@@ -2,7 +2,133 @@
    YATRA DRISHTI
    STEP 2 - EXPLORE INDIA ENGINE
 ========================================= */
+ const API_BASE_URL = "http://127.0.0.1:8000/api/v1";
 
+    // 1. Initialize the Supabase client with your details
+const supabaseUrl = 'https://xxhifkdicxdkpaoyumnr.supabase.co';
+const supabaseKey = 'sb_publishable_lHlOARe0pA3GIrztt8AdDg_sELdMKUc';
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+// 2. Function to save details
+async function saveToSupabase(event) {
+    event.preventDefault(); // Stop the page from reloading
+
+    // Get your form data (assuming your form has an ID like 'detailsForm')
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    // Map your form fields to your Supabase columns
+    // Replace 'column_name' with your actual table column names
+    const dataToSave = {
+        name: formData.get('name'), // example field
+        email: formData.get('email'), // example field
+        details: formData.get('details') // example field
+    };
+
+    // 3. Insert data into your Supabase table
+    const { data, error } = await supabase
+        .from('your_table_name') // <--- Change this to your table name
+        .insert([dataToSave]);
+
+    if (error) {
+        console.error('Error saving data:', error.message);
+        alert('Failed to save details: ' + error.message);
+    } else {
+        console.log('Details saved successfully:', data);
+        alert('Details saved successfully!');
+        form.reset(); // Clear the form
+    }
+}
+
+// 4. Attach the function to your form's submit event
+document.getElementById('detailsForm').addEventListener('submit', saveToSupabase);
+
+    // DOM Elements
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    
+    let chatHistory = []; // Local history for context
+    
+    // Core Function to Send Message
+    async function sendHeritageMessage() {
+        const message = userInput.value.trim();
+        if (!message) return;
+    
+        // 1. Add User Message to UI
+        addChatMessage(message, 'user');
+        userInput.value = '';
+        
+        // 2. Show Typing Indicator
+        const typingId = showTypingIndicator();
+        
+        try {
+            // 3. API Request to Backend
+            const response = await fetch(`${API_BASE_URL}/companion/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: "priya_123", // Example ID
+                    message: message,
+                    history: chatHistory,
+                    site_id: null // Can be populated dynamically based on current view
+                })
+            });
+    
+            const data = await response.json();
+            removeTypingIndicator(typingId);
+    
+            if (data.response) {
+                // 4. Add AI Response to UI
+                addChatMessage(data.response, 'ai');
+                // Update history for context
+                chatHistory.push({ role: "user", text: message });
+                chatHistory.push({ role: "model", text: data.response });
+            } else {
+                addChatMessage("I'm having trouble connecting to the heritage database. Please try again.", 'ai');
+            }
+        } catch (error) {
+            removeTypingIndicator(typingId);
+            console.error("Chat Error:", error);
+            addChatMessage("Sorry, I couldn't connect to Virasat AI right now. Check if the backend is running.", 'ai');
+        }
+    }
+    
+    // UI Helper: Add Message
+    function addChatMessage(text, role) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `msg ${role}`;
+        
+        // Simple markdown-to-html conversion for newlines and bold
+        const formattedText = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        msgDiv.innerHTML = formattedText;
+        
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // UI Helper: Typing Indicator
+    function showTypingIndicator() {
+        const id = 'typing-' + Date.now();
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'msg ai typing';
+        typingDiv.id = id;
+        typingDiv.innerHTML = '<i>Yatra Drishti  is thinking...</i>';
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return id;
+    }
+    
+    function removeTypingIndicator(id) {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    }
+    
+    // Listeners
+    sendBtn.addEventListener('click', sendHeritageMessage);
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendHeritageMessage();
+    });
 document.addEventListener("DOMContentLoaded", function () {
 
 
