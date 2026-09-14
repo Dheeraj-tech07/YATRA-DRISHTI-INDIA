@@ -19,7 +19,7 @@
         rel="stylesheet">
 
     <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
@@ -1980,8 +1980,7 @@
     <button
         type="button"
         class="show-saved-btn"
-        id="showSavedPlacesBtn"
-        onclick="toggleSavedPlaces()">
+        id="showSavedPlacesBtn">
 
         👁 Show Saved Places
 
@@ -2876,7 +2875,7 @@
 
                 <a href="#">About Yatra Drishti</a>
                 <a href="#">Contact</a>
-                <a href="#">Feedback</a>
+                <a href="#feedback">Feedback</a>
                 <a href="#">Privacy</a>
 
             </div>
@@ -2897,6 +2896,22 @@
         </div>
 
     </footer>
+
+    <!-- SIH feedback form: isse backend ke /api/feedback endpoint se connect kiya gaya hai. -->
+    <section id="feedback" class="section feedback-section">
+        <div class="section-heading">
+            <span>YOUR VOICE MATTERS</span>
+            <h2>Share Feedback</h2>
+            <p>Yatra Drishti ko aur useful banane ke liye apna feedback bhejein.</p>
+        </div>
+        <form id="detailsForm" class="feedback-form">
+            <input type="text" name="name" placeholder="Your name" required>
+            <input type="email" name="email" placeholder="Email (optional)">
+            <textarea name="details" rows="4" placeholder="Your feedback" required></textarea>
+            <button type="submit">Submit Feedback</button>
+            <p id="feedbackStatus" role="status" aria-live="polite"></p>
+        </form>
+    </section>
 
 
     <!-- =========================================
@@ -3143,8 +3158,9 @@
 
 <!-- YOUR JAVASCRIPT -->
 
-<script src="js/data.js"></script>
-<script src="js/app.js"></script>
+<script src="./data.js"></script>
+<script src="./app.js"></script>
+<script src="./frontend-api.js"></script>
 
 
 

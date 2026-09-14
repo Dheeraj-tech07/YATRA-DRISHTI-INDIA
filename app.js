@@ -2,46 +2,16 @@
    YATRA DRISHTI
    STEP 2 - EXPLORE INDIA ENGINE
 ========================================= */
- const API_BASE_URL = "http://127.0.0.1:8000/api/v1";
+const API_BASE_URL = "http://127.0.0.1:8000/api/v1";
 
-    // 1. Initialize the Supabase client with your details
-const supabaseUrl = 'https://xxhifkdicxdkpaoyumnr.supabase.co';
-const supabaseKey = 'sb_publishable_lHlOARe0pA3GIrztt8AdDg_sELdMKUc';
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-// 2. Function to save details
-async function saveToSupabase(event) {
-    event.preventDefault(); // Stop the page from reloading
-
-    // Get your form data (assuming your form has an ID like 'detailsForm')
-    const form = event.target;
-    const formData = new FormData(form);
-    
-    // Map your form fields to your Supabase columns
-    // Replace 'column_name' with your actual table column names
-    const dataToSave = {
-        name: formData.get('name'), // example field
-        email: formData.get('email'), // example field
-        details: formData.get('details') // example field
-    };
-
-    // 3. Insert data into your Supabase table
-    const { data, error } = await supabase
-        .from('your_table_name') // <--- Change this to your table name
-        .insert([dataToSave]);
-
-    if (error) {
-        console.error('Error saving data:', error.message);
-        alert('Failed to save details: ' + error.message);
-    } else {
-        console.log('Details saved successfully:', data);
-        alert('Details saved successfully!');
-        form.reset(); // Clear the form
-    }
+// Purane Supabase placeholder ko hata kar feedback ab Express API ko handle karne diya gaya hai.
+// Is guard se missing optional form ke kaaran poora frontend crash nahi hota.
+const detailsForm = document.getElementById("detailsForm");
+if (detailsForm) {
+    detailsForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+    });
 }
-
-// 4. Attach the function to your form's submit event
-document.getElementById('detailsForm').addEventListener('submit', saveToSupabase);
 
     // DOM Elements
     const chatMessages = document.getElementById('chat-messages');
@@ -49,6 +19,53 @@ document.getElementById('detailsForm').addEventListener('submit', saveToSupabase
     const sendBtn = document.getElementById('send-btn');
     
     let chatHistory = []; // Local history for context
+
+    // Optional map integration: map load na ho to baaki app normal chalta rahe.
+    function initializeOptionalMap() {
+        if (!window.map) {
+            return;
+        }
+
+        if (typeof window.map.invalidateSize === "function") {
+            window.map.invalidateSize();
+        }
+    }
+
+    // LocalStorage/backend sync fail hone par hamesha usable array return karo.
+    function readSavedPlacesBackup() {
+        try {
+            const rawValue = localStorage.getItem("yatra_saved");
+            const parsedValue = rawValue ? JSON.parse(rawValue) : [];
+            return Array.isArray(parsedValue) ? parsedValue : [];
+        } catch (error) {
+            console.warn("Saved Places storage reset:", error.message);
+            return [];
+        }
+    }
+
+    function writeSavedPlacesBackup(places) {
+        const safePlaces = Array.isArray(places) ? places : [];
+
+        try {
+            localStorage.setItem("yatra_saved", JSON.stringify(safePlaces));
+        } catch (error) {
+            console.warn("Saved Places LocalStorage write failed:", error.message);
+        }
+
+        return safePlaces;
+    }
+
+    // Saved Places renderer global scope me hai, isliye inner getIcon function par depend nahi karega.
+    function getSavedPlaceIcon(category) {
+        const value = String(category || "").toLowerCase();
+
+        if (value.includes("fort")) return "🏰";
+        if (value.includes("palace")) return "👑";
+        if (value.includes("temple")) return "🛕";
+        if (value.includes("nature") || value.includes("wildlife")) return "🌿";
+        if (value.includes("culture")) return "🎭";
+        return "🏛️";
+    }
     
     // Core Function to Send Message
     async function sendHeritageMessage() {
@@ -124,12 +141,16 @@ document.getElementById('detailsForm').addEventListener('submit', saveToSupabase
         if (el) el.remove();
     }
     
-    // Listeners
-    sendBtn.addEventListener('click', sendHeritageMessage);
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendHeritageMessage();
-    });
+    // Legacy chat markup current page me optional hai, isliye listeners ko null-safe rakha gaya hai.
+    if (sendBtn && userInput && chatMessages) {
+        sendBtn.addEventListener('click', sendHeritageMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendHeritageMessage();
+        });
+    }
 document.addEventListener("DOMContentLoaded", function () {
+
+    initializeOptionalMap();
 
 
     /* =====================================
@@ -3032,12 +3053,7 @@ document.addEventListener(
                 INDIA_HERITAGE[state][index];
 
 
-            let saved =
-                JSON.parse(
-                    localStorage.getItem(
-                        "yatra_saved"
-                    ) || "[]"
-                );
+            let saved = readSavedPlacesBackup();
 
 
             const exists =
@@ -3081,10 +3097,11 @@ document.addEventListener(
             });
 
 
-            localStorage.setItem(
-                "yatra_saved",
-                JSON.stringify(saved)
-            );
+            writeSavedPlacesBackup(saved);
+
+            if (typeof renderSavedPlaces === "function") {
+                renderSavedPlaces();
+            }
 
 
             alert(
@@ -4506,12 +4523,7 @@ function saveAIRecommendations(
     }
 
 
-    let savedPlaces =
-        JSON.parse(
-            localStorage.getItem(
-                "yatra_saved"
-            ) || "[]"
-        );
+    let savedPlaces = readSavedPlacesBackup();
 
 
     places.forEach(
@@ -4542,12 +4554,11 @@ function saveAIRecommendations(
     );
 
 
-    localStorage.setItem(
-        "yatra_saved",
-        JSON.stringify(
-            savedPlaces
-        )
-    );
+    writeSavedPlacesBackup(savedPlaces);
+
+    if (typeof renderSavedPlaces === "function") {
+        renderSavedPlaces();
+    }
 
 
     alert(
@@ -6635,9 +6646,7 @@ document.addEventListener(
 
 function getSavedPlaces() {
 
-    return JSON.parse(
-        localStorage.getItem("yatra_saved") || "[]"
-    );
+    return readSavedPlacesBackup();
 
 }
 
@@ -6648,10 +6657,7 @@ function getSavedPlaces() {
 
 function saveUpdatedPlaces(places) {
 
-    localStorage.setItem(
-        "yatra_saved",
-        JSON.stringify(places)
-    );
+    writeSavedPlacesBackup(places);
 
 }
 
@@ -7102,9 +7108,7 @@ document.addEventListener(
 
 function getSavedPlaces() {
 
-    return JSON.parse(
-        localStorage.getItem("yatra_saved") || "[]"
-    );
+    return readSavedPlacesBackup();
 
 }
 
@@ -7179,7 +7183,7 @@ function renderSavedPlaces() {
                 </div>
 
                 <h3>
-                    No Saved Places
+                    No saved places added yet
                 </h3>
 
                 <p>
@@ -7196,11 +7200,21 @@ function renderSavedPlaces() {
     }
 
 
-    /* Show saved places */
+    /* Saved array se complete cards generate karo. */
 
     grid.innerHTML =
         saved.map(
             function(place, index) {
+
+                const imageUrl =
+                    place.imageUrl ||
+                    place.image ||
+                    "assets/images/heritage-placeholder.jpg";
+
+                const location =
+                    place.location ||
+                    place.state ||
+                    "India";
 
                 return `
 
@@ -7217,11 +7231,18 @@ function renderSavedPlaces() {
                         <div
                             class="saved-place-icon">
 
-                            ${getIcon(
+                            ${getSavedPlaceIcon(
                                 place.category || "heritage"
                             )}
 
                         </div>
+
+                        <img
+                            class="saved-place-image"
+                            src="${imageUrl}"
+                            alt="${place.name || "Saved heritage place"}"
+                            loading="lazy"
+                            onerror="this.style.display='none'">
 
 
                         <div
@@ -7242,7 +7263,7 @@ function renderSavedPlaces() {
 
 
                             <p>
-                                📍 ${place.state}
+                                📍 ${location}
                             </p>
 
 
@@ -7329,6 +7350,9 @@ function toggleSavedPlaces() {
         return;
     }
 
+    // Har click par latest LocalStorage data se cards/counts refresh karo.
+    renderSavedPlaces();
+
 
     if (
         grid.classList.contains(
@@ -7355,6 +7379,41 @@ function toggleSavedPlaces() {
     }
 
 }
+
+function handleSavedPlacesButtonClick(event) {
+    event.preventDefault();
+    toggleSavedPlaces();
+}
+
+// Event delegation fallback: dynamic UI ya duplicate markup hone par bhi click capture hota hai.
+document.addEventListener("click", function (event) {
+    const button = event.target.closest("#showSavedPlacesBtn");
+
+    if (!button || event.savedPlacesHandled) {
+        return;
+    }
+
+    event.savedPlacesHandled = true;
+    handleSavedPlacesButtonClick(event);
+});
+
+// Initial state ko explicit rakho: list hidden aur button ka action Show.
+document.addEventListener("DOMContentLoaded", function () {
+    const grid = document.getElementById("savedPlacesGrid");
+    const button = document.getElementById("showSavedPlacesBtn");
+
+    if (grid) {
+        grid.classList.add("saved-hidden");
+    }
+
+    if (button) {
+        button.textContent = "👁 Show Saved Places";
+        button.addEventListener("click", function (event) {
+            event.savedPlacesHandled = true;
+            handleSavedPlacesButtonClick(event);
+        });
+    }
+});
 
 
 /* =========================================
@@ -7450,10 +7509,7 @@ function unsaveSavedPlace(
     );
 
 
-    localStorage.setItem(
-        "yatra_saved",
-        JSON.stringify(saved)
-    );
+    writeSavedPlacesBackup(saved);
 
 
     renderSavedPlaces();
@@ -7509,10 +7565,7 @@ function removeSavedPlace(index) {
     );
 
 
-    localStorage.setItem(
-        "yatra_saved",
-        JSON.stringify(saved)
-    );
+    writeSavedPlacesBackup(saved);
 
 
     renderSavedPlaces();
@@ -8599,9 +8652,7 @@ function getProfileJourneys() {
 
 function getProfileSavedPlaces() {
 
-    return JSON.parse(
-        localStorage.getItem("yatra_saved") || "[]"
-    );
+    return readSavedPlacesBackup();
 
 }
 
