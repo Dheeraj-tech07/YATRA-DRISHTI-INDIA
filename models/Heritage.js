@@ -4,11 +4,13 @@ const mongoose = require("mongoose");
 const heritageSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true, index: true },
-    location: { type: String, required: true, trim: true },
-    state: { type: String, required: true, trim: true, index: true },
-    description: { type: String, default: "", trim: true },
-    category: { type: String, required: true, trim: true, index: true },
-    imageUrl: { type: String, default: "", trim: true }
+   location: { type: String, required: true, trim: true },
+state: { type: String, required: true, trim: true, index: true },
+description: { type: String, default: "", trim: true },
+category: { type: String, required: true, trim: true, index: true },
+lat: { type: Number },
+lng: { type: Number },
+imageUrl: { type: String, default: "", trim: true }
   },
   { timestamps: true }
 );

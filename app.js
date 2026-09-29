@@ -2,7 +2,25 @@
    YATRA DRISHTI
    STEP 2 - EXPLORE INDIA ENGINE
 ========================================= */
-const API_BASE_URL = "http://127.0.0.1:8000/api/v1";
+const API_BASE_URL = "http://localhost:5000/api";
+let backendHeritageData = [];
+async function initializeBackendHeritage() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/heritage`);
+
+        if (!response.ok) {
+            throw new Error("Heritage data load nahi hua.");
+        }
+
+        backendHeritageData = await response.json();
+
+        console.log(
+            `Backend heritage data loaded: ${backendHeritageData.length} records`
+        );
+    } catch (error) {
+        console.error("Backend heritage load failed:", error);
+    }
+}
 
 // Purane Supabase placeholder ko hata kar feedback ab Express API ko handle karne diya gaya hai.
 // Is guard se missing optional form ke kaaran poora frontend crash nahi hota.
@@ -68,6 +86,7 @@ if (detailsForm) {
     }
     
     // Core Function to Send Message
+
     async function sendHeritageMessage() {
         const message = userInput.value.trim();
         if (!message) return;
@@ -109,7 +128,7 @@ if (detailsForm) {
             console.error("Chat Error:", error);
             addChatMessage("Sorry, I couldn't connect to Virasat AI right now. Check if the backend is running.", 'ai');
         }
-    }
+    } 
     
     // UI Helper: Add Message
     function addChatMessage(text, role) {
@@ -232,6 +251,90 @@ document.addEventListener("DOMContentLoaded", function () {
 const navLinks = document.querySelectorAll(".nav-menu a");
 const navbar = document.querySelector(".navbar");
 
+/* =====================================
+   MOBILE LEFT MENU
+===================================== */
+
+const mobileMenuToggle =
+    document.getElementById("mobileMenuToggle");
+
+const mobileMenuOverlay =
+    document.getElementById("mobileMenuOverlay");
+
+const mainNav =
+    document.getElementById("mainNav");
+
+
+function closeMobileMenu() {
+
+    if (!mainNav) return;
+
+    mainNav.classList.remove("mobile-open");
+
+    if (mobileMenuOverlay) {
+        mobileMenuOverlay.classList.remove("show");
+    }
+
+    if (mobileMenuToggle) {
+        mobileMenuToggle.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+        mobileMenuToggle.textContent = "☰";
+    }
+}
+
+
+if (mobileMenuToggle && mainNav) {
+
+    mobileMenuToggle.addEventListener(
+        "click",
+        function () {
+
+            const isOpen =
+                mainNav.classList.toggle("mobile-open");
+
+            if (mobileMenuOverlay) {
+                mobileMenuOverlay.classList.toggle(
+                    "show",
+                    isOpen
+                );
+            }
+
+            mobileMenuToggle.setAttribute(
+                "aria-expanded",
+                String(isOpen)
+            );
+
+            mobileMenuToggle.textContent =
+                isOpen ? "✕" : "☰";
+        }
+    );
+
+
+    mainNav
+        .querySelectorAll(".nav-link")
+        .forEach(function (link) {
+
+            link.addEventListener(
+                "click",
+                closeMobileMenu
+            );
+
+        });
+
+
+    if (mobileMenuOverlay) {
+
+        mobileMenuOverlay.addEventListener(
+            "click",
+            closeMobileMenu
+        );
+
+    }
+
+}
 
 /* -----------------------------------------
    CLICK NAVIGATION
@@ -375,7 +478,7 @@ window.addEventListener(
 
     let currentCategory = "all";
 
-
+let currentExplorePlaces = [];
     /* =====================================
        POPULATE 36 STATES / UTs
     ===================================== */
@@ -411,11 +514,8 @@ window.addEventListener(
     /* =====================================
        CATEGORY ICON
     ===================================== */
-
-    function getIcon(category) {
-
-        const c =
-            category.toLowerCase();
+function getIcon(category) {
+    const c = String(category || "").toLowerCase();
 
 
         if (c.includes("fort"))
@@ -432,6 +532,9 @@ window.addEventListener(
 
         if (c.includes("nature"))
             return "🌿";
+
+         if (c.includes("food")) 
+         return "🍛";
 
         if (c.includes("wildlife"))
             return "🐅";
@@ -506,6 +609,290 @@ window.addEventListener(
 
 
     /* =====================================
+   LOAD EXPLORE DATA FROM SUPABASE
+===================================== */
+
+/* ===================================== 
+   LOAD EXPLORE DATA FROM SUPABASE 
+   SUPABASE = PRIMARY
+   data.js = FALLBACK
+===================================== */
+
+async function loadExplorePlaces(state, category = "all") {
+
+    if (!state) return;
+
+    const normalizedCategory =
+        String(category || "all").toLowerCase();
+
+    if (exploreResults) {
+
+        exploreResults.innerHTML = `
+            <div class="explore-empty">
+                <div>⏳</div>
+
+                <h3>
+                    Loading ${
+                        normalizedCategory === "food"
+                            ? "food"
+                            : "heritage places"
+                    }...
+                </h3>
+
+                <p>
+                    Please wait while we load ${state} data.
+                </p>
+            </div>
+        `;
+    }
+
+    /* =====================================
+       DATA.JS FALLBACK FUNCTION
+    ===================================== */
+
+    function getExploreFallback() {
+
+        /* ---------- FOOD FALLBACK ---------- */
+
+        if (normalizedCategory === "food") {
+
+            if (
+                typeof FOOD_DATA !== "undefined" &&
+                FOOD_DATA[state]
+            ) {
+
+                return FOOD_DATA[state].map(function (food) {
+
+                    return {
+
+                        id: food.id,
+
+                        name: food.name,
+
+                        category: "Food",
+
+                        state: state,
+
+                        location:
+                            food.location || state,
+
+                        description:
+                            food.description || "",
+
+                        image_url:
+                            food.image_url || "",
+
+                        food_type:
+                            food.food_type || "",
+
+                        veg_nonveg:
+                            food.veg_nonveg || "",
+
+                        price_range:
+                            food.price_range || "",
+
+                        lat:
+                            food.lat ?? null,
+
+                        lng:
+                            food.lng ?? null,
+
+                        isFallback: true
+
+                    };
+
+                });
+
+            }
+
+            return [];
+        }
+
+
+        /* ---------- HERITAGE FALLBACK ---------- */
+
+        return getPlacesByState(state)
+            .map(function (place, index) {
+
+                return {
+
+                    name: place[0],
+
+                    category: place[1],
+
+                    lat: Number(place[2]),
+
+                    lng: Number(place[3]),
+
+                    location: state,
+
+                    state: state,
+
+                    description: "",
+
+                    image_url: "",
+
+                    originalIndex: index,
+
+                    isFallback: true
+
+                };
+
+            });
+    }
+
+
+    try {
+
+        /* =====================================
+           1. TRY SUPABASE / BACKEND FIRST
+        ===================================== */
+
+        const response = await fetch(
+
+            `${API_BASE_URL}/explore?state=${encodeURIComponent(state)}&category=${encodeURIComponent(normalizedCategory)}`,
+
+            {
+                method: "GET",
+
+                headers: {
+                    "Accept": "application/json"
+                }
+            }
+
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Explore API HTTP ${response.status}`
+            );
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        if (!result.success) {
+
+            throw new Error(
+                result.error ||
+                result.message ||
+                "Explore API failed."
+            );
+
+        }
+
+
+        const supabasePlaces =
+            Array.isArray(result.results)
+                ? result.results
+                : [];
+
+
+        /* =====================================
+           2. SUPABASE HAS DATA
+        ===================================== */
+
+        if (supabasePlaces.length > 0) {
+
+            currentExplorePlaces =
+                supabasePlaces.map(function (place) {
+
+                    return {
+
+                        ...place,
+
+                        category:
+                            place.category ||
+                            (
+                                normalizedCategory === "food"
+                                    ? "Food"
+                                    : "Heritage"
+                            ),
+
+                        state:
+                            place.state || state,
+
+                        location:
+                            place.location || state,
+
+                        image_url:
+                            place.image_url || "",
+
+                        isFallback: false
+
+                    };
+
+                });
+
+
+            console.log(
+                `Explore: ${currentExplorePlaces.length} ${normalizedCategory} records loaded from Supabase.`
+            );
+
+
+            renderStatePlaces();
+
+            return;
+        }
+
+
+        /* =====================================
+           3. SUPABASE WORKING BUT EMPTY
+           → USE data.js
+        ===================================== */
+
+        console.warn(
+            `Supabase returned 0 ${normalizedCategory} records for ${state}. Using data.js fallback.`
+        );
+
+
+        currentExplorePlaces =
+            getExploreFallback();
+
+
+        console.log(
+            `Explore fallback: ${currentExplorePlaces.length} records loaded from data.js.`
+        );
+
+
+        renderStatePlaces();
+
+    }
+
+
+    catch (error) {
+
+        /* =====================================
+           4. SUPABASE FAILED
+           → USE data.js
+        ===================================== */
+
+        console.error(
+            "Explore API failed. Using data.js fallback:",
+            error
+        );
+
+
+        currentExplorePlaces =
+            getExploreFallback();
+
+
+        console.log(
+            `Explore fallback: ${currentExplorePlaces.length} records loaded from data.js.`
+        );
+
+
+        renderStatePlaces();
+
+    }
+
+}
+    /* =====================================
        SHOW STATE
     ===================================== */
 
@@ -552,12 +939,33 @@ if (explorePlaceSearch) {
 
         }
 
-
-        renderStatePlaces();
+loadExplorePlaces(state);
 
     }
 
 
+    /* =====================================
+   FIND STATIC PLACE INDEX
+   Keeps existing Explore actions working
+===================================== */
+
+function getStaticPlaceIndex(state, placeName) {
+
+    const staticPlaces =
+        getPlacesByState(state);
+
+    const index =
+        staticPlaces.findIndex(function (place) {
+
+            return (
+                String(place[0]).trim().toLowerCase() ===
+                String(placeName).trim().toLowerCase()
+            );
+
+        });
+
+    return index;
+}
     /* =====================================
        RENDER STATE PLACES
     ===================================== */
@@ -566,20 +974,40 @@ function renderStatePlaces() {
 
     if (!currentState) return;
 
-    let places = getPlacesByState(currentState).map(function (place, index) {
-    return {
-        place: place,
-        originalIndex: index
-    };
-});
+ let places = currentExplorePlaces.map(function (place) {
 
+    const isFood =
+        String(place.category || "")
+            .toLowerCase()
+            .includes("food");
+
+    return {
+
+        place: place,
+
+        originalIndex: isFood
+            ? -1
+            : getStaticPlaceIndex(
+                currentState,
+                place.name
+            )
+
+    };
+
+});
     /* Category filtering */
     if (currentCategory !== "all") {
+
     places = places.filter(function (item) {
-        return item.place[1]
+
+        return String(item.place.category || "")
             .toLowerCase()
-            .includes(currentCategory.toLowerCase());
+            .includes(
+                currentCategory.toLowerCase()
+            );
+
     });
+
 }
 /* Explore India Search */
 const exploreSearchInput =
@@ -596,10 +1024,11 @@ if (exploreQuery) {
         const place = item.place;
 
         const searchText = (
-            place[0] + " " +
-            place[1] + " " +
-            currentState
-        ).toLowerCase();
+    place.name + " " +
+    place.category + " " +
+    place.location + " " +
+    currentState
+).toLowerCase();
 
         return searchText.includes(exploreQuery);
     });
@@ -608,9 +1037,8 @@ if (exploreQuery) {
 
     /* Update place count */
 if (placeCount) {
-
-    const searchInput =
-        document.getElementById("heritageSearch");
+const searchInput =
+    document.getElementById("explorePlaceSearch");
 
     const searchText =
         searchInput
@@ -662,10 +1090,21 @@ if (placeCount) {
     const place = item.place;
     const originalIndex = item.originalIndex;
 
-    const name = place[0];
-    const category = place[1];
-    const lat = place[2];
-    const lng = place[3];
+    const hasStaticPlace =
+    originalIndex !== -1;
+const name = place.name || "";
+const category = place.category || "";
+const lat = Number(place.lat) || 0;
+const lng = Number(place.lng) || 0;
+const imageUrl = place.image_url || "";
+const safeImageUrl = String(imageUrl).trim();
+
+console.log(
+    "Explore image:",
+    name,
+    "=>",
+    safeImageUrl
+);
 
             const recommendation =
                 getRecommendation(
@@ -718,6 +1157,46 @@ if (placeCount) {
 
                     </div>
 
+   <div
+    class="heritage-card-image"
+    style="
+        width:100%;
+        height:220px;
+        overflow:hidden;
+        border-radius:18px;
+        margin:0 0 20px 0;
+        background:linear-gradient(135deg, #fff3e0, #f8e4c8);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    "
+>
+    ${
+        safeImageUrl
+            ? `
+                <img
+                    src="${safeImageUrl}"
+                    alt="${escapeQuotes(name)}"
+                    loading="lazy"
+                    style="
+                        width:100%;
+                        height:100%;
+                        object-fit:cover;
+                        display:block;
+                    "
+                    onerror="
+                        console.error('Explore image failed:', this.src);
+                        this.style.display='none';
+                    "
+                >
+            `
+            : `
+                <div style="font-size:48px;">
+                    🏛️
+                </div>
+            `
+    }
+</div>
 
                     <!-- Place information -->
 
@@ -747,24 +1226,24 @@ if (placeCount) {
                     <!-- Actions -->
 
                     <div class="heritage-card-actions">
-
                         <button
-                                class="card-explore-btn"
-                             onclick="viewHeritage('${escapeQuotes(currentState)}', ${originalIndex})">
-
-                            ✦ Explore
-
-                        </button>
-
-
-                        <button
-                         class="card-save-btn"
-                           onclick="saveHeritage('${escapeQuotes(currentState)}', ${originalIndex})">
-
-                            ♡ Save
-
-                        </button>
-
+    class="card-explore-btn"
+    onclick="${
+        hasStaticPlace
+            ? `viewHeritage('${escapeQuotes(currentState)}', ${originalIndex})`
+            : `alert('Heritage details are not available yet.')`
+    }">
+    ✦ Explore
+</button>
+<button
+    class="card-save-btn"
+    onclick="${
+        hasStaticPlace
+            ? `saveHeritage('${escapeQuotes(currentState)}', ${originalIndex})`
+            : `alert('This place cannot be saved yet.')`
+    }">
+    ♡ Save
+</button>
 
                         <button
     class="card-nav-btn"
@@ -775,13 +1254,13 @@ if (placeCount) {
     )">
     🧭 Navigate
 </button>
-
 <button
     class="card-yatra-btn"
-    onclick="addPlaceToYatra(
-        '${escapeQuotes(currentState)}',
-        ${originalIndex}
-    )">
+    onclick="${
+        hasStaticPlace
+            ? `addPlaceToYatra('${escapeQuotes(currentState)}', ${originalIndex})`
+            : `alert('This place cannot be added to Yatra yet.')`
+    }">
     🗺️ Add to Yatra
 </button>
 
@@ -875,50 +1354,51 @@ if (placeCount) {
        CATEGORY FILTER
     ===================================== */
 
-    document
-        .querySelectorAll(".category-filter")
-        .forEach(function (button) {
+ document
+    .querySelectorAll(".category-filter")
+    .forEach(function (button) {
 
-            button.addEventListener(
-                "click",
-                function () {
+        button.addEventListener(
+            "click",
+            async function () {
 
-                    if (!currentState) {
+                if (!currentState) {
 
-                        alert(
-                            "Please select a State / UT first."
-                        );
+                    alert(
+                        "Please select a State / UT first."
+                    );
 
-                        return;
+                    return;
 
-                    }
+                }
 
+                document
+                    .querySelectorAll(".category-filter")
+                    .forEach(function (item) {
 
-                    document
-                        .querySelectorAll(
-                            ".category-filter"
-                        )
-                        .forEach(
-                            function (item) {
+                        item.classList.remove("active");
 
-                                item.classList
-                                    .remove("active");
+                    });
 
-                            }
-                        );
+                this.classList.add("active");
 
+                currentCategory =
+                    String(
+                        this.dataset.category || "all"
+                    ).toLowerCase();
 
-                    this.classList.add("active");
+                /*
+                 * Load selected category
+                 * directly from Supabase
+                 */
+                await loadExplorePlaces(
+                    currentState,
+                    currentCategory
+                );
 
+            }
+        );
 
-                    currentCategory =
-                        this.dataset.category;
-
-
-            renderStatePlaces();
-                    
-     }
-    );
     });
 
         /* =====================================
@@ -977,7 +1457,6 @@ if (clearHeritageSearch) {
 /* =====================================
    GLOBAL HERITAGE SEARCH — STEP 22.2
 ===================================== */
-
 const searchInput =
     document.getElementById("heritageSearch");
 
@@ -988,16 +1467,34 @@ const heritageResults =
     document.getElementById("heritageResults");
 
 
+    /* -------------------------------------
+   SEARCH BUTTON CLICK
+------------------------------------- */
+
+if (searchButton) {
+    searchButton.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            searchHeritage();
+
+        }
+    );
+}
+
 /* -------------------------------------
    SEARCH NORMALIZER
 ------------------------------------- */
-
 function normalizeSearchText(text) {
     return String(text || "")
         .toLowerCase()
-        .trim()
-        .replace(/\s+/g, " ");
+      .replace(/[^\w\s]/g, " ")   
+        .replace(/\s+/g, " ")
+    .trim();
 }
+
 
 
 /* -------------------------------------
@@ -1090,7 +1587,6 @@ function detectSearchCategory(query) {
 /* -------------------------------------
    SEARCH SCORE
 ------------------------------------- */
-
 function getSearchScore(place, query) {
 
     const search =
@@ -1388,7 +1884,6 @@ function normalizeSearchText(text) {
         .trim();
 }
 
-
 /* -------------------------------------
    SEARCH KEYWORDS
 ------------------------------------- */
@@ -1489,7 +1984,6 @@ function detectSearchCategory(query) {
 /* -------------------------------------
    GET SEARCH SCORE
 ------------------------------------- */
-
 function getSearchScore(place, query) {
 
     const text =
@@ -2488,17 +2982,13 @@ else if (heritageVoiceBtn) {
     /* =====================================
        HELPERS
     ===================================== */
+window.escapeQuotes = function (text) {
 
-    window.escapeQuotes =
-        function (text) {
+    return String(text ?? "")
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'");
 
-            return text
-                .replace(/\\/g, "\\\\")
-                .replace(/'/g, "\\'");
-
-        };
-
-
+};
     /* =====================================
        EXPOSE FUNCTIONS
     ===================================== */
@@ -2580,7 +3070,7 @@ function getModelPath(name) {
 }
 
 
-/* =========================================
+/* =========================================~
    OPEN 3D VIEWER
 ========================================= */
 
@@ -4135,37 +4625,38 @@ function detectInterestsFromQuery(query) {
    GENERATE AI TRIP
 ===================================================== */
 
-function generateAITrip() {
+/* =====================================================
+   GENERATE AI TRIP
+   DATA.JS + BACKEND AI ENGINE
+===================================================== */
+
+async function generateAITrip() {
 
     try {
 
         const stateElement =
-            document.getElementById(
-                "aiState"
-            );
+            document.getElementById("aiState");
 
         const durationElement =
-            document.getElementById(
-                "aiDuration"
-            );
+            document.getElementById("aiDuration");
 
         const budgetElement =
-            document.getElementById(
-                "aiBudget"
-            );
+            document.getElementById("aiBudget");
 
         const travelElement =
-            document.getElementById(
-                "aiTravelMode"
-            );
+            document.getElementById("aiTravelMode");
 
         const queryElement =
-            document.getElementById(
-                "aiQuery"
-            );
+            document.getElementById("aiQuery");
 
 
-        if (!stateElement) {
+        if (
+            !stateElement ||
+            !durationElement ||
+            !budgetElement ||
+            !travelElement ||
+            !queryElement
+        ) {
 
             alert(
                 "AI Guide is not initialized."
@@ -4177,30 +4668,28 @@ function generateAITrip() {
 
 
         const state =
-            stateElement.value;
-
+            stateElement.value.trim();
 
         const duration =
             parseInt(
                 durationElement.value
             ) || 1;
 
-
         const budget =
             parseInt(
                 budgetElement.value
             ) || 5000;
 
-
         const travelMode =
             travelElement.value;
-
 
         const query =
             queryElement.value.trim();
 
 
-        /* State validation */
+        /* =========================================
+           STATE VALIDATION
+        ========================================= */
 
         if (!state) {
 
@@ -4213,78 +4702,266 @@ function generateAITrip() {
         }
 
 
-        /* Detect interests */
+        /* =========================================
+           DETECT INTERESTS
+        ========================================= */
 
         detectInterestsFromQuery(
             query
         );
 
 
-        /* Get recommendations */
+        /* =========================================
+           GET DATA.JS HERITAGE DATA
+        ========================================= */
 
-        const recommendations =
-            getAIRecommendations(
-                state,
-                aiSelectedInterests
-            
-            );
+        let localHeritagePlaces = [];
 
 
-        if (!recommendations.length) {
+        if (
+            typeof INDIA_HERITAGE !== "undefined" &&
+            Array.isArray(INDIA_HERITAGE[state])
+        ) {
 
-            alert(
-                "No heritage places found."
-            );
+            localHeritagePlaces =
+                INDIA_HERITAGE[state].map(
+                    function(place, index) {
 
-            return;
+                        return {
+
+                            name: place[0],
+
+                            category: place[1],
+
+                            lat: Number(place[2]),
+
+                            lng: Number(place[3]),
+
+                            originalIndex: index,
+
+                            state: state
+
+                        };
+
+                    }
+                );
 
         }
 
 
-        /* Number of places */
-
-        const numberOfPlaces =
-            Math.min(
-                Math.max(
-                    duration * 2,
-                    2
-                ),
-                recommendations.length
-            );
+        console.log(
+            "📦 data.js places:",
+            localHeritagePlaces.length
+        );
 
 
-        const tripPlaces =
-            recommendations.slice(
+        /* =========================================
+           SEND ONLY RELEVANT DATA TO BACKEND
+        ========================================= */
+
+        const localContext =
+            localHeritagePlaces.slice(
                 0,
-                numberOfPlaces
+                30
             );
 
+
+        /* =========================================
+           LOADING
+        ========================================= */
+
+        const container =
+            document.getElementById(
+                "aiResult"
+            );
+
+
+        if (container) {
+
+            container.innerHTML = `
+
+                <div class="ai-loading">
+
+                    <div class="ai-loading-icon">
+                        ✨
+                    </div>
+
+                    <h3>
+                        Creating your Yatra...
+                    </h3>
+
+                    <p>
+                        Yatra Drishti AI is combining
+                        your heritage data with travel
+                        information.
+                    </p>
+
+                </div>
+
+            `;
+
+            container.classList.add(
+                "show"
+            );
+
+        }
+
+
+        /* =========================================
+           BACKEND AI PLANNER
+        ========================================= */
+const response = 
+    await fetch(
+        `${API_BASE_URL}/ai/plan`,
+        {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        state: state,
+
+                        duration: duration,
+
+                        budget: budget,
+
+                        travelMode: travelMode,
+
+                        query: query,
+
+                        interests:
+                            aiSelectedInterests,
+
+                        localHeritagePlaces:
+                            localContext
+
+                    })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        /* =========================================
+           CHECK BACKEND RESPONSE
+        ========================================= */
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+
+                data.error ||
+                data.message ||
+                "AI planner failed."
+
+            );
+
+        }
+
+
+        console.log(
+            "✅ AI Plan Response:",
+            data
+        );
+
+
+        /* =========================================
+           GET PLACES FROM BACKEND
+        ========================================= */
+
+        const places =
+            Array.isArray(data.places)
+                ? data.places
+                : [];
+
+
+        if (!places.length) {
+
+            throw new Error(
+                "AI planner did not return any places."
+            );
+
+        }
+
+
+        /* =========================================
+           USE EXISTING AI RESULT UI
+        ========================================= */
 
         renderAITrip(
             state,
             duration,
             budget,
             travelMode,
-            tripPlaces
+            places
         );
 
 
     } catch (error) {
 
         console.error(
-            "AI Trip Error:",
+            "❌ AI Trip Error:",
             error
         );
 
 
-        alert(
-            "Something went wrong while creating your Yatra."
-        );
+        const container =
+            document.getElementById(
+                "aiResult"
+            );
+
+
+        if (container) {
+
+            container.innerHTML = `
+
+                <div class="ai-error">
+
+                    <div class="ai-error-icon">
+                        ⚠️
+                    </div>
+
+                    <h3>
+                        Yatra could not be created
+                    </h3>
+
+                    <p>
+                        ${error.message ||
+                        "Something went wrong."}
+                    </p>
+
+                    <button
+                        class="ai-action-btn primary"
+                        onclick="generateAITrip()">
+
+                        🔄 Try Again
+
+                    </button>
+
+                </div>
+
+            `;
+
+            container.classList.add(
+                "show"
+            );
+
+        }
 
     }
 
 }
-
 
 /* =====================================================
    RENDER AI TRIP
@@ -5575,28 +6252,27 @@ function markPlaceObjectVisited(
 function getVisitedStates(
     visited
 ) {
+    if (!Array.isArray(visited)) {
+        return [];
+    }
 
     return [
         ...new Set(
             visited.map(
                 function(place) {
-
                     return place.state;
-
                 }
             )
         )
     ];
-
 }
-
 
 /* =========================================
    GET BADGE COUNT
 ========================================= */
 
 function getUnlockedBadges(
-    visited
+    visited = []
 ) {
 
     const states =
@@ -6318,45 +6994,6 @@ document.addEventListener("DOMContentLoaded", function () {
 /* =====================================================
    STEP 13 — HERITAGE SEARCH
 ===================================================== */
-
-const heritageSearchInput =
-    document.getElementById("heritageSearch");
-
-const clearHeritageSearch =
-    document.getElementById("clearHeritageSearch");
-
-function filterHeritageSearch() {
-    const searchText =
-        heritageSearchInput
-            ? heritageSearchInput.value.trim().toLowerCase()
-            : "";
-
-    if (clearHeritageSearch) {
-        clearHeritageSearch.style.display =
-            searchText ? "flex" : "none";
-    }
-
-    renderStatePlaces();
-}
-
-if (heritageSearchInput) {
-    heritageSearchInput.addEventListener(
-        "input",
-        filterHeritageSearch
-    );
-}
-
-if (clearHeritageSearch) {
-    clearHeritageSearch.addEventListener(
-        "click",
-        function () {
-            heritageSearchInput.value = "";
-            clearHeritageSearch.style.display = "none";
-            renderStatePlaces();
-            heritageSearchInput.focus();
-        }
-    );
-}
 
 
 
@@ -8431,6 +9068,9 @@ function openProfileEditor() {
     const phoneInput =
         document.getElementById("profilePhoneInput");
 
+        const emailInput =
+    document.getElementById("profileEmailInput");
+
     const passwordInput =
         document.getElementById("profilePasswordInput");
 
@@ -8456,6 +9096,13 @@ function openProfileEditor() {
         phoneInput.value =
             profile.phone || "";
 
+            if (emailInput) {
+
+    emailInput.value =
+        profile.email || "";
+
+}
+
         passwordInput.value =
             "";
 
@@ -8475,6 +9122,13 @@ function openProfileEditor() {
 
         phoneInput.value =
             "";
+
+            if (emailInput) {
+
+    emailInput.value =
+        "";
+
+}
 
         passwordInput.value =
             "";
@@ -8509,9 +9163,9 @@ function closeProfileEditor() {
 }
 
 
-/* ---------- SAVE / CREATE PROFILE ---------- */
+/* ---------- SAVE / CREATE PROFILE WITH SUPABASE AUTH ---------- */
 
-function saveProfileAccount() {
+async function saveProfileAccount() {
 
     const nameInput =
         document.getElementById("profileNameInput");
@@ -8519,11 +9173,30 @@ function saveProfileAccount() {
     const phoneInput =
         document.getElementById("profilePhoneInput");
 
+    const emailInput =
+        document.getElementById("profileEmailInput");
+
     const passwordInput =
         document.getElementById("profilePasswordInput");
 
     const confirmInput =
         document.getElementById("profileConfirmPasswordInput");
+
+    const saveButton =
+        document.getElementById("profileSaveBtn");
+
+
+    if (
+        !nameInput ||
+        !phoneInput ||
+        !emailInput ||
+        !passwordInput ||
+        !confirmInput
+    ) {
+        alert("Profile form properly load nahi hua.");
+        return;
+    }
+
 
     const name =
         nameInput.value.trim();
@@ -8531,17 +9204,19 @@ function saveProfileAccount() {
     const phone =
         phoneInput.value.trim();
 
+    const email =
+        emailInput.value.trim().toLowerCase();
+
     const password =
         passwordInput.value;
 
     const confirmPassword =
         confirmInput.value;
 
-    const oldProfile =
-        getProfileAccount();
 
-
-    /* NAME */
+    /* =========================
+       NAME VALIDATION
+    ========================= */
 
     if (!name) {
 
@@ -8550,11 +9225,12 @@ function saveProfileAccount() {
         nameInput.focus();
 
         return;
-
     }
 
 
-    /* PHONE */
+    /* =========================
+       PHONE VALIDATION
+    ========================= */
 
     if (!/^[6-9][0-9]{9}$/.test(phone)) {
 
@@ -8565,13 +9241,28 @@ function saveProfileAccount() {
         phoneInput.focus();
 
         return;
-
     }
 
 
-    /* PASSWORD */
+    /* =========================
+       EMAIL VALIDATION
+    ========================= */
 
-    if (!oldProfile && password.length < 6) {
+    if (!email) {
+
+        alert("Please enter your email address.");
+
+        emailInput.focus();
+
+        return;
+    }
+
+
+    /* =========================
+       PASSWORD VALIDATION
+    ========================= */
+
+    if (password.length < 6) {
 
         alert(
             "Password must contain at least 6 characters."
@@ -8580,26 +9271,12 @@ function saveProfileAccount() {
         passwordInput.focus();
 
         return;
-
     }
 
 
-    /* EDIT PASSWORD */
-
-    if (password && password.length < 6) {
-
-        alert(
-            "Password must contain at least 6 characters."
-        );
-
-        passwordInput.focus();
-
-        return;
-
-    }
-
-
-    /* CONFIRM PASSWORD */
+    /* =========================
+       CONFIRM PASSWORD
+    ========================= */
 
     if (password !== confirmPassword) {
 
@@ -8608,36 +9285,188 @@ function saveProfileAccount() {
         confirmInput.focus();
 
         return;
-
     }
 
 
-    const profile = {
+    /* =========================
+       BUTTON LOADING
+    ========================= */
 
-        name: name,
+    if (saveButton) {
 
-        phone: phone,
+        saveButton.disabled = true;
 
-        password:
-            password || (oldProfile ? oldProfile.password : "")
+        saveButton.textContent =
+            "Creating Account...";
+    }
 
-    };
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE_URL}/auth/register`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    
+body: JSON.stringify({
+    name: name,
+    email: email,
+    phone: phone,
+    password: password
+})
+                }
+            );
 
 
-    saveProfileAccountToStorage(profile);
+        const data =
+            await response.json();
 
-    renderUserProfile();
 
-    closeProfileEditor();
+        /* =========================
+           REGISTER ERROR
+        ========================= */
 
-    alert(
-        oldProfile
-            ? "✅ Profile updated successfully!"
-            : "🎉 Profile created successfully!"
-    );
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Registration failed."
+            );
+        }
+
+
+        /* =========================
+           SAVE PROFILE DATA
+           WITHOUT PASSWORD
+        ========================= */
+
+        const profile = {
+
+            id:
+                data.user?.id || "",
+
+            name:
+                data.user?.name || name,
+
+            email:
+                data.user?.email || email,
+
+            phone:
+                phone
+        };
+
+
+        /*
+         * IMPORTANT:
+         * Password yahan save nahi karna hai.
+         */
+
+        saveProfileAccountToStorage(profile);
+
+
+        /* =========================
+           AUTO LOGIN
+        ========================= */
+
+        const loginResponse =
+            await fetch(
+                `${API_BASE_URL}/auth/login`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                }
+            );
+
+
+        const loginData =
+            await loginResponse.json();
+
+
+        if (!loginResponse.ok) {
+
+            throw new Error(
+                loginData.message ||
+                "Account created, but automatic login failed."
+            );
+        }
+
+
+        /* =========================
+           SAVE AUTH SESSION
+        ========================= */
+
+        localStorage.setItem(
+            "yatra_auth_token",
+            loginData.token
+        );
+
+
+        localStorage.setItem(
+            "yatra_auth_user",
+            JSON.stringify(
+                loginData.user
+            )
+        );
+
+
+        /* =========================
+           UPDATE PROFILE
+        ========================= */
+
+        renderUserProfile();
+
+        renderProfileName();
+
+
+        closeProfileEditor();
+
+
+        alert(
+            "🎉 Account created and login successful!"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Profile registration error:",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Registration failed. Please try again."
+        );
+
+
+    } finally {
+
+        if (saveButton) {
+
+            saveButton.disabled = false;
+
+            saveButton.textContent =
+                "Create Profile";
+        }
+
+    }
 
 }
-
 
 /* ---------- PROFILE STATS ---------- */
 
@@ -9108,14 +9937,230 @@ function closeQuizPage() {
     }
 
 }
+
 /* =====================================================
-   STEP 19.3 — AI HERITAGE CHATBOT
-   ===================================================== */
+   REAL GEMINI AI HERITAGE CHATBOT — PREMIUM VERSION
+   YATRA DRISHTI
+===================================================== */
+
+let geminiChatHistory = [];
+
+
+/* =====================================================
+   YATRA DRISHTI — AI SYSTEM INSTRUCTION
+===================================================== */
+
+const YATRA_DRISHTI_SYSTEM_INSTRUCTION = `
+You are the official AI Heritage Guide of "Yatra Drishti — Explore • Experience • Preserve".
+
+Your primary purpose is to help users discover, understand and experience India's:
+- Heritage
+- History
+- Culture
+- Traditions
+- Temples
+- Forts
+- Palaces
+- Monuments
+- Museums
+- Architecture
+- Art and crafts
+- Folk dances
+- Festivals
+- Food culture
+- Heritage destinations
+- Travel routes
+- Yatra planning
+
+IMPORTANT RESPONSE RULES:
+
+1. LANGUAGE
+- Reply in the same language used by the user.
+- If the user uses Hindi, reply in Hindi.
+- If the user uses Hinglish, reply in natural Hinglish.
+- If the user uses English, reply in English.
+- Do not unnecessarily change the user's language.
+
+2. GREETING
+- For a new conversation, begin naturally with:
+  "Namaste! 🙏"
+- Do not repeat the greeting in every single follow-up message.
+
+3. ANSWER QUALITY
+- Give complete, useful and well-structured answers.
+- Do not stop after only 2-3 sentences unless the user specifically asks for a short answer.
+- Explain important details instead of giving a one-line response.
+- Prefer headings, bullet points and short paragraphs.
+- Avoid unnecessary repetition.
+
+4. HERITAGE QUESTIONS
+For a heritage place, when relevant include:
+- 📍 Location
+- 🏛️ Historical significance
+- 📜 History
+- 👑 Who built it / associated ruler or dynasty
+- 🏗️ Architecture
+- 🎨 Cultural significance
+- 🌍 UNESCO/world significance if applicable
+- ⏰ Visiting information when reliable
+- 🚗 How to reach
+- ⭐ Nearby attractions
+- 💡 Useful travel tips
+
+5. TRAVEL / YATRA QUESTIONS
+When the user asks for a trip or itinerary:
+- Suggest a practical route.
+- Consider distance and travel time.
+- Suggest nearby heritage places.
+- Consider number of days.
+- Consider budget if provided.
+- Mention approximate travel sequence.
+- Keep the route realistic.
+- If exact current timings, ticket prices or live information are required, clearly say that those details should be verified from official/current sources.
+
+6. COMPARISONS
+If the user asks to compare places:
+Use a clear structure such as:
+- Location
+- Historical importance
+- Architecture
+- Cultural importance
+- Best for
+- Recommended time
+- Nearby attractions
+
+7. ACCURACY
+- Never intentionally invent historical facts.
+- If you are uncertain about a specific fact, clearly say that it should be verified.
+- Do not present guesses as confirmed facts.
+
+8. YATRA DRISHTI PERSONALIZATION
+Whenever useful, connect the answer to the user's:
+- Destination
+- Interests
+- Number of days
+- Budget
+- Travel preferences
+
+9. STYLE
+Use relevant emojis naturally:
+🛕 🏰 🏛️ 📜 🌿 🚂 🍛 🎭 📍 ⭐
+
+Do not overuse emojis.
+
+10. RESPONSE LENGTH
+- Give enough detail to fully answer the question.
+- For simple questions: concise but complete.
+- For detailed questions: provide a detailed structured answer.
+- Never intentionally truncate an answer just to make it short.
+`;
+
+
+/* =====================================================
+   GEMINI API KEY
+===================================================== */
+
+function getGeminiApiKey() {
+
+    // 1. First check APP_CONFIG
+    if (
+        window.APP_CONFIG &&
+        window.APP_CONFIG.GEMINI_API_KEY &&
+        window.APP_CONFIG.GEMINI_API_KEY.trim()
+    ) {
+        return window.APP_CONFIG.GEMINI_API_KEY.trim();
+    }
+
+    // 2. Then check browser localStorage
+    const saved = localStorage.getItem("yatra_gemini_api_key");
+
+    if (saved && saved.trim()) {
+        return saved.trim();
+    }
+
+    return "";
+}
+
+
+/* =====================================================
+   AI CHAT SETTINGS
+===================================================== */
+
+function openAIChatSettings() {
+
+    const modal = document.getElementById("aiSettingsModal");
+    const input = document.getElementById("geminiApiKeyInput");
+
+    if (modal) {
+        modal.style.display = "flex";
+
+        if (input) {
+            input.value = getGeminiApiKey();
+            input.focus();
+        }
+    }
+}
+
+
+function closeAIChatSettings() {
+
+    const modal = document.getElementById("aiSettingsModal");
+
+    if (modal) {
+        modal.style.display = "none";
+    }
+}
+
+
+/* =====================================================
+   SAVE GEMINI API KEY
+===================================================== */
+
+function saveGeminiApiKey() {
+
+    const input = document.getElementById("geminiApiKeyInput");
+    const status = document.getElementById("keySaveStatus");
+
+    if (!input) return;
+
+    const key = input.value.trim();
+
+    if (!key) {
+        alert("Kripya valid Gemini API key enter karein.");
+        return;
+    }
+
+    localStorage.setItem("yatra_gemini_api_key", key);
+
+    if (status) {
+        status.textContent = "✅ Gemini API Key successfully save ho gayi!";
+        status.style.display = "block";
+    }
+
+    setTimeout(function () {
+
+        closeAIChatSettings();
+
+        if (status) {
+            status.style.display = "none";
+        }
+
+        addAIChatMessage(
+            "Aapki Gemini API Key successfully connect ho gayi hai! 🎉 Ab aap Yatra Drishti AI Heritage Guide se Bharat ki heritage, culture, history aur Yatra planning ke baare mein pooch sakte hain.",
+            "bot"
+        );
+
+    }, 800);
+}
+
+
+/* =====================================================
+   TOGGLE AI CHAT
+===================================================== */
 
 function toggleAIChat() {
 
-    const chatWindow =
-        document.getElementById("aiChatWindow");
+    const chatWindow = document.getElementById("aiChatWindow");
 
     if (!chatWindow) return;
 
@@ -9123,19 +10168,18 @@ function toggleAIChat() {
 
     if (chatWindow.classList.contains("active")) {
 
-        const input =
-            document.getElementById("aiChatInput");
+        const input = document.getElementById("aiChatInput");
 
         if (input) {
-            setTimeout(function () {
-                input.focus();
-            }, 200);
+            setTimeout(() => input.focus(), 200);
         }
     }
 }
 
 
-/* Enter key */
+/* =====================================================
+   ENTER KEY
+===================================================== */
 
 function handleAIChatKey(event) {
 
@@ -9148,62 +10192,209 @@ function handleAIChatKey(event) {
 }
 
 
-/* Send message */
-
-function sendAIChatMessage() {
-
-    const input =
-        document.getElementById("aiChatInput");
-
-    if (!input) return;
-
-    const message =
-        input.value.trim();
-
-    if (!message) return;
-
-    addAIChatMessage(message, "user");
-
-    input.value = "";
-
-    showAITyping();
-
-    /*
-       TEMPORARY RESPONSE
-
-       Real AI backend Step 19.4 mein
-       connect kiya jayega.
-    */
-
-    setTimeout(function () {
-
-        removeAITyping();
-
-        const response =
-            getHeritageAIResponse(message);
-
-        addAIChatMessage(response, "bot");
-
-    }, 900);
-}
-
-
-/* Quick question */
+/* =====================================================
+   QUICK AI QUESTION
+===================================================== */
 
 function askAIQuickQuestion(question) {
 
-    const input =
-        document.getElementById("aiChatInput");
+    const input = document.getElementById("aiChatInput");
 
-    if (!input) return;
+    if (input) {
 
-    input.value = question;
+        input.value = question;
 
-    sendAIChatMessage();
+        sendAIChatMessage();
+    }
 }
 
 
-/* Add message */
+/* =====================================================
+   OPEN AI CHAT FROM YATRA
+===================================================== */
+
+function openAIChatFromYatra() {
+
+    const chatWindow = document.getElementById("aiChatWindow");
+
+    if (chatWindow) {
+
+        chatWindow.classList.add("active");
+
+        const input = document.getElementById("aiChatInput");
+
+        if (input) {
+
+            input.value =
+                "Mujhe Bharat ke best heritage destinations suggest karein.";
+
+            input.focus();
+        }
+    }
+}
+
+
+/* =====================================================
+   SEND AI CHAT MESSAGE
+===================================================== */
+
+async function sendAIChatMessage() {
+
+    const input = document.getElementById("aiChatInput");
+
+    if (!input) return;
+
+    const userMessage = input.value.trim();
+
+    if (!userMessage) return;
+
+
+    // Show user message
+    addAIChatMessage(userMessage, "user");
+
+    // Clear input
+    input.value = "";
+
+    // Show typing animation
+    showAITyping();
+
+
+    try {
+
+      const response = await fetch(`${API_BASE_URL}/ai/chat`, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        message: userMessage
+    })
+});
+
+const data = await response.json();
+
+if (!response.ok || !data.success) {
+    throw new Error(
+        data.error ||
+        data.message ||
+        "AI backend response failed."
+    );
+}
+
+const botReply = data.reply;
+
+        removeAITyping();
+
+        addAIChatMessage(botReply, "bot");
+
+    } catch (error) {
+
+        removeAITyping();
+
+        console.error("AI Chat Error:", error);
+
+        addAIChatMessage(
+            "⚠️ Sorry, abhi AI response generate nahi ho paya. Kripya dobara try karein.",
+            "bot"
+        );
+    }
+}
+
+
+/* =====================================================
+   GEMINI API CALL
+===================================================== */
+/* =====================================================
+   BACKEND AI CHAT
+===================================================== */
+
+async function callGeminiAPI(userQuery) {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE_URL}/ai/chat`,
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+    message: userQuery,
+
+    history: Array.isArray(geminiChatHistory)
+        ? geminiChatHistory.slice(-10)
+        : []
+
+})
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+
+                data.error ||
+                data.message ||
+                "AI chat failed."
+
+            );
+
+        }
+
+
+        return (
+            data.reply ||
+            data.response ||
+            data.message ||
+            "Sorry, mujhe abhi response nahi mila."
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Backend AI Chat Error:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+
+/* =====================================================
+   CLEAR AI CHAT MEMORY
+===================================================== */
+
+function clearGeminiChatHistory() {
+
+    geminiChatHistory = [];
+
+    console.log("Gemini chat history cleared.");
+
+}
+
+
+/* =====================================================
+   ADD AI CHAT MESSAGE
+===================================================== */
 
 function addAIChatMessage(message, sender) {
 
@@ -9211,6 +10402,7 @@ function addAIChatMessage(message, sender) {
         document.getElementById("aiChatMessages");
 
     if (!messages) return;
+
 
     const messageDiv =
         document.createElement("div");
@@ -9222,21 +10414,25 @@ function addAIChatMessage(message, sender) {
     if (sender === "bot") {
 
         messageDiv.innerHTML = `
+
             <div class="ai-message-avatar">
                 🤖
             </div>
 
             <div class="ai-message-content">
-                <p>${formatAIMessage(message)}</p>
+                ${formatAIMessage(message)}
             </div>
+
         `;
 
     } else {
 
         messageDiv.innerHTML = `
+
             <div class="ai-message-content">
-                <p>${formatAIMessage(message)}</p>
+                <p>${escapeHTML(message)}</p>
             </div>
+
         `;
     }
 
@@ -9248,19 +10444,103 @@ function addAIChatMessage(message, sender) {
 }
 
 
-/* Basic message formatting */
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
 
-function formatAIMessage(message) {
+function escapeHTML(str) {
 
-    return message
+    return (str || "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\n/g, "<br>");
+        .replace(/>/g, "&gt;");
 }
 
 
-/* Typing indicator */
+/* =====================================================
+   FORMAT AI MESSAGE
+===================================================== */
+
+function formatAIMessage(message) {
+
+    if (!message) return "";
+
+
+    let formatted = message
+
+        .replace(
+            /\*\*(.*?)\*\*/g,
+            "<strong>$1</strong>"
+        )
+
+        .replace(
+            /\*(.*?)\*/g,
+            "<em>$1</em>"
+        )
+
+        .replace(
+            /^### (.*$)/gim,
+            "<strong style='display:block;margin:6px 0 2px;'>$1</strong>"
+        )
+
+        .replace(
+            /^## (.*$)/gim,
+            "<strong style='display:block;margin:8px 0 3px;font-size:14px;'>$1</strong>"
+        )
+
+        .replace(
+            /^\* (.*$)/gim,
+            "<li>$1</li>"
+        )
+
+        .replace(
+            /^- (.*$)/gim,
+            "<li>$1</li>"
+        );
+
+
+    formatted =
+        formatted.replace(
+            /(<li>[\s\S]*?<\/li>)/gim,
+            "<ul>$1</ul>"
+        );
+
+
+    formatted =
+        formatted.replace(
+            /<\/ul>\s*<ul>/gim,
+            ""
+        );
+
+
+    const paragraphs =
+        formatted.split(/\n\n+/);
+
+
+    return paragraphs
+        .map(p => {
+
+            p = p.trim();
+
+            if (
+                p.startsWith("<ul>") ||
+                p.startsWith("<div") ||
+                p.startsWith("<strong") ||
+                p.startsWith("<em")
+            ) {
+
+                return p;
+            }
+
+            return `<p>${p.replace(/\n/g, "<br>")}</p>`;
+        })
+        .join("");
+}
+
+
+/* =====================================================
+   AI TYPING INDICATOR
+===================================================== */
 
 function showAITyping() {
 
@@ -9269,27 +10549,34 @@ function showAITyping() {
 
     if (!messages) return;
 
+
     removeAITyping();
 
 
     const typing =
         document.createElement("div");
 
-    typing.id = "aiTypingIndicator";
+    typing.id =
+        "aiTypingIndicator";
 
     typing.className =
         "ai-message bot";
 
+
     typing.innerHTML = `
+
         <div class="ai-message-avatar">
             🤖
         </div>
 
         <div class="ai-typing">
+
             <span></span>
             <span></span>
             <span></span>
+
         </div>
+
     `;
 
 
@@ -9300,7 +10587,9 @@ function showAITyping() {
 }
 
 
-/* Remove typing indicator */
+/* =====================================================
+   REMOVE AI TYPING
+===================================================== */
 
 function removeAITyping() {
 
@@ -9310,191 +10599,6 @@ function removeAITyping() {
     if (typing) {
         typing.remove();
     }
-}
-
-
-/* =====================================================
-   TEMPORARY HERITAGE RESPONSES
-   Real AI will replace this in Step 19.4
-   ===================================================== */
-
-function getHeritageAIResponse(message) {
-
-    const query =
-        message.toLowerCase();
-
-
-    /* Greeting */
-
-    if (
-        query.includes("hello") ||
-        query.includes("hi") ||
-        query.includes("namaste") ||
-        query.includes("नमस्ते")
-    ) {
-
-        return `
-            Namaste! 🙏<br>
-            Main Yatra Drishti ka AI Heritage Guide hoon.
-            Aap Bharat ke heritage, culture, traditions,
-            monuments, festivals aur travel ke baare mein
-            mujhse pooch sakte hain.
-        `;
-    }
-
-
-    /* Taj Mahal */
-
-    if (
-        query.includes("taj mahal") ||
-        query.includes("ताज महल")
-    ) {
-
-        return `
-            🕌 Taj Mahal Agra, Uttar Pradesh mein
-            Yamuna River ke kinare sthit ek famous
-            Mughal-era monument hai. 
-
-            Aap chahein to main iska history,
-            architecture aur Agra heritage itinerary
-            bhi bata sakta hoon.
-        `;
-    }
-
-
-    /* Rajasthan */
-
-    if (
-        query.includes("rajasthan") ||
-        query.includes("राजस्थान")
-    ) {
-
-        return `
-            🏰 Rajasthan apne forts, palaces,
-            desert culture aur royal heritage ke liye
-            famous hai.
-
-            Popular places mein Jaipur, Jodhpur,
-            Udaipur, Jaisalmer aur Chittorgarh
-            shamil hain.
-        `;
-    }
-
-
-    /* Kashi / Varanasi */
-
-    if (
-        query.includes("kashi") ||
-        query.includes("varanasi") ||
-        query.includes("banaras") ||
-        query.includes("काशी")
-    ) {
-
-        return `
-            🕉️ Kashi, yani Varanasi/Banaras,
-            Bharat ke pramukh spiritual aur cultural
-            cities mein se ek hai.
-
-            Ganga Ghats, Kashi Vishwanath Temple,
-            Ganga Aarti aur ancient traditions
-            iski identity ka important part hain.
-        `;
-    }
-
-
-    /* Culture */
-
-    if (
-        query.includes("culture") ||
-        query.includes("culture of india") ||
-        query.includes("संस्कृति") ||
-        query.includes("sanskriti")
-    ) {
-
-        return `
-            🇮🇳 Indian culture bahut diverse hai.
-
-            Ismein languages, music, dance,
-            food, festivals, clothing, traditions,
-            architecture aur regional customs
-            shamil hain.
-
-            India ke different regions ki apni
-            unique cultural identity hai.
-        `;
-    }
-
-
-    /* Heritage */
-
-    if (
-        query.includes("heritage") ||
-        query.includes("monument") ||
-        query.includes("monuments") ||
-        query.includes("virasat") ||
-        query.includes("विरासत")
-    ) {
-
-        return `
-            🏛️ Bharat ka heritage historical
-            monuments, archaeological sites,
-            temples, forts, palaces, traditions,
-            art forms aur living culture ka
-            combination hai.
-
-            Main aapko kisi bhi particular state,
-            city ya heritage site ke baare mein
-            explain kar sakta hoon.
-        `;
-    }
-
-
-    /* Travel / Yatra */
-
-    if (
-        query.includes("trip") ||
-        query.includes("travel") ||
-        query.includes("yatra") ||
-        query.includes("plan") ||
-        query.includes("tour")
-    ) {
-
-        return `
-            🗺️ Bilkul! Main aapki heritage Yatra
-            plan karne mein help kar sakta hoon.
-
-            Aap mujhe bas ye batao:
-
-            📍 Destination
-            📅 Kitne din
-            💰 Approx budget
-            ❤️ Kis type ka heritage pasand hai
-
-            Example:
-            "Mujhe 3 din ki Rajasthan heritage
-            trip plan karo."
-        `;
-    }
-
-
-    /* Default */
-
-    return `
-        🤖 Interesting question!
-
-        Main Bharat ke heritage, culture,
-        traditions, monuments, festivals,
-        architecture aur Yatra planning se
-        related questions answer kar sakta hoon.
-
-        Aap apna question thoda detail mein
-        pooch sakte hain.
-
-        Example:
-        "Khajuraho temples ki history batao."
-    `;
-
-
 }
 
 
@@ -10315,21 +11419,37 @@ function renderUnifiedYatraResult(
 
 
     html += `
+        </div>
 
-            </div>
+        <div class="route-note">
+            🧭 Route sequence is calculated using
+            geographic distance between destinations.
+        </div>
 
+        <div class="yatra-route-actions">
 
-            <div class="route-note">
+            <button
+                type="button"
+                class="btn primary"
+                onclick="openGoogleMapsYatraRoute()">
 
-                🧭 Route sequence is calculated using
-                geographic distance between destinations.
+                🗺️ View Full Route on Google Maps
 
-            </div>
+            </button>
+
+            <button
+                type="button"
+                class="btn secondary"
+                onclick="saveAdvancedYatra()">
+
+                💾 Save to My Journeys
+
+            </button>
 
         </div>
 
-    `;
-
+    </div>
+`;
 
     result.innerHTML = html;
 
@@ -10342,20 +11462,23 @@ function renderUnifiedYatraResult(
     });
 
 }
+
+
 /* ---------- SAVE YATRA ---------- */
 
 function saveAdvancedYatra() {
 
-    if (advancedYatraPlaces.length === 0) {
+    if (
+        !Array.isArray(advancedYatraPlaces) ||
+        advancedYatraPlaces.length === 0
+    ) {
         return;
     }
-
 
     let journey =
         JSON.parse(
             localStorage.getItem("yatra_journey") || "[]"
         );
-
 
     advancedYatraPlaces.forEach(function(place) {
 
@@ -10369,34 +11492,197 @@ function saveAdvancedYatra() {
 
             });
 
-
-        if (!exists && journey.length < 4) {
-
+        if (
+            !exists &&
+            journey.length < 4
+        ) {
             journey.push(place);
-
         }
 
     });
-
 
     localStorage.setItem(
         "yatra_journey",
         JSON.stringify(journey)
     );
 
+    alert(
+        "🧭 Your Yatra has been saved to My Journeys!"
+    );
 
-    alert("🧭 Your Yatra has been saved to My Journeys!");
-
-
-    if (typeof renderMyJourneys === "function") {
-
+    if (
+        typeof renderMyJourneys === "function"
+    ) {
         renderMyJourneys();
-
     }
 
 }
 
 
+/* =====================================================
+   STEP 22.8 — GOOGLE MAPS FULL YATRA ROUTE
+   CURRENT LOCATION → OPTIMIZED DESTINATIONS
+===================================================== */
+
+function openGoogleMapsYatraRoute() {
+
+    /* ---------- CHECK DESTINATIONS ---------- */
+
+    if (
+        !Array.isArray(advancedYatraPlaces) ||
+        advancedYatraPlaces.length === 0
+    ) {
+        alert(
+            "🗺️ Please generate your Yatra route first."
+        );
+
+        return;
+    }
+
+
+    /* ---------- CHECK CURRENT LOCATION ---------- */
+
+    if (!userCurrentLocation) {
+
+        alert(
+            "📍 Please detect your current location first."
+        );
+
+        setYatraCurrentLocation();
+
+        return;
+    }
+
+
+    /* ---------- ORIGIN ---------- */
+
+    const origin =
+        Number(userCurrentLocation.lat) +
+        "," +
+        Number(userCurrentLocation.lng);
+
+
+    /* ---------- FINAL DESTINATION ---------- */
+
+    const lastPlace =
+        advancedYatraPlaces[
+            advancedYatraPlaces.length - 1
+        ];
+
+
+    if (
+        !lastPlace ||
+        !Number.isFinite(Number(lastPlace.lat)) ||
+        !Number.isFinite(Number(lastPlace.lng))
+    ) {
+
+        alert(
+            "❌ Destination location is not available."
+        );
+
+        return;
+    }
+
+
+    const destination =
+        Number(lastPlace.lat) +
+        "," +
+        Number(lastPlace.lng);
+
+
+    /* ---------- INTERMEDIATE STOPS ---------- */
+
+    const waypoints =
+        advancedYatraPlaces
+            .slice(0, -1)
+            .map(function(place) {
+
+                return (
+                    Number(place.lat) +
+                    "," +
+                    Number(place.lng)
+                );
+
+            });
+
+
+    /* ---------- GOOGLE MAPS URL ---------- */
+
+    let googleMapsURL =
+        "https://www.google.com/maps/dir/?api=1";
+
+
+    googleMapsURL +=
+        "&origin=" +
+        encodeURIComponent(origin);
+
+
+    googleMapsURL +=
+        "&destination=" +
+        encodeURIComponent(destination);
+
+
+    /* ---------- ADD WAYPOINTS ---------- */
+
+    if (waypoints.length > 0) {
+
+        googleMapsURL +=
+            "&waypoints=" +
+            encodeURIComponent(
+                waypoints.join("|")
+            );
+
+    }
+
+
+    /* ---------- TRAVEL MODE ---------- */
+
+    googleMapsURL +=
+        "&travelmode=driving";
+
+
+    /* ---------- NAVIGATION MODE ---------- */
+
+    googleMapsURL +=
+        "&dir_action=navigate";
+
+
+    /* ---------- DEBUG ---------- */
+
+    console.log(
+        "🗺️ Opening Yatra Route:",
+        advancedYatraPlaces
+    );
+
+    console.log(
+        "📍 Origin:",
+        origin
+    );
+
+    console.log(
+        "🏛️ Destination:",
+        destination
+    );
+
+    console.log(
+        "🛣️ Waypoints:",
+        waypoints
+    );
+
+    console.log(
+        "🔗 Google Maps URL:",
+        googleMapsURL
+    );
+
+
+    /* ---------- OPEN GOOGLE MAPS ---------- */
+
+    window.open(
+        googleMapsURL,
+        "_blank"
+    );
+
+}
 
 /* ---------- CURRENT LOCATION ---------- */
 
@@ -10617,4 +11903,1391 @@ function findBestYatraRoute(startLocation, destinations) {
         route: bestRoute,
         distanceKm: shortestDistance
     };
+}
+
+/* =====================================
+   AI CHAT VOICE INPUT
+===================================== */
+
+function initAIChatVoice() {
+
+    const voiceBtn =
+        document.getElementById("aiChatVoiceBtn");
+
+    const input =
+        document.getElementById("aiChatInput");
+
+    const AIChatSpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+    if (!voiceBtn || !input) {
+        return;
+    }
+
+    if (!AIChatSpeechRecognition) {
+
+        voiceBtn.addEventListener(
+            "click",
+            function () {
+
+                alert(
+                    "Voice input is not supported in this browser. Please use Google Chrome or Microsoft Edge."
+                );
+
+            }
+        );
+
+        return;
+    }
+
+    const recognition =
+        new AIChatSpeechRecognition();
+
+    recognition.lang = "en-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    voiceBtn.addEventListener(
+        "click",
+        function () {
+
+            try {
+
+                recognition.start();
+
+                voiceBtn.classList.add("listening");
+
+                voiceBtn.innerHTML = "🔴";
+
+                voiceBtn.title =
+                    "Listening... Speak now";
+
+            } catch (error) {
+
+                console.warn(
+                    "AI chat voice start error:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+    recognition.addEventListener(
+        "result",
+        function (event) {
+
+            const transcript =
+                event.results[0][0]
+                    .transcript
+                    .trim();
+
+            if (!transcript) {
+                return;
+            }
+
+            input.value =
+                transcript;
+
+            /* Automatically send to Gemini */
+
+            sendAIChatMessage();
+
+        }
+    );
+
+    recognition.addEventListener(
+        "end",
+        function () {
+
+            voiceBtn.classList.remove(
+                "listening"
+            );
+
+            voiceBtn.innerHTML = "🎙️";
+
+            voiceBtn.title =
+                "Speak";
+
+        }
+    );
+
+    recognition.addEventListener(
+        "error",
+        function (event) {
+
+            console.warn(
+                "AI chat voice error:",
+                event.error
+            );
+
+            voiceBtn.classList.remove(
+                "listening"
+            );
+
+            voiceBtn.innerHTML = "🎙️";
+
+            voiceBtn.title =
+                "Speak";
+
+        }
+    );
+}
+/* =====================================
+   INITIALIZE AI CHAT VOICE
+===================================== */
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () {
+        initAIChatVoice();
+        loadHeritageFromBackend();
+    });
+} else {
+    initAIChatVoice();
+    loadHeritageFromBackend();
+}
+/* =====================================================
+   INTERACTIVE INDIA MAP — REACH YOUR DESTINATION
+   ===================================================== */
+
+const interactiveStateMapNames = {
+    INAN: "Andaman and Nicobar Islands",
+    INTG: "Telangana",
+    INAP: "Andhra Pradesh",
+    INAR: "Arunachal Pradesh",
+    INAS: "Assam",
+    INBR: "Bihar",
+    INCH: "Chandigarh",
+    INCT: "Chhattisgarh",
+    INDH: "Dadra and Nagar Haveli and Daman and Diu",
+    INDL: "Delhi",
+    INGA: "Goa",
+    INGJ: "Gujarat",
+    INHR: "Haryana",
+    INHP: "Himachal Pradesh",
+    INJH: "Jharkhand",
+    INKA: "Karnataka",
+    INKL: "Kerala",
+    INMP: "Madhya Pradesh",
+    INMH: "Maharashtra",
+    INMN: "Manipur",
+    INML: "Meghalaya",
+    INMZ: "Mizoram",
+    INNL: "Nagaland",
+    INOR: "Odisha",
+    INPY: "Puducherry",
+    INPB: "Punjab",
+    INRJ: "Rajasthan",
+    INSK: "Sikkim",
+    INTN: "Tamil Nadu",
+    INTR: "Tripura",
+    INUP: "Uttar Pradesh",
+    INUT: "Uttarakhand",
+    INWB: "West Bengal",
+    INLD: "Lakshadweep",
+    INJK: "Jammu and Kashmir",
+    INLA: "Ladakh"
+};
+const SVG_PATH_STATE_MAP = {
+    st0: "Andaman and Nicobar Islands",
+    st1: "West Bengal",
+    st2: "Lakshadweep",
+    st3: "Puducherry",
+    st4: "Puducherry",
+    st5: "Dadra and Nagar Haveli and Daman and Diu",
+    st6: "Mizoram",
+    st7: "Assam",
+    st8: "Punjab",
+    st9: "Goa",
+    st10: "Gujarat",
+    st11: "Jammu and Kashmir",
+    st12: "Haryana",
+    st13: "Nagaland",
+    st14: "Manipur",
+    st15: "Tripura",
+    st16: "Madhya Pradesh",
+    st17: "Chhattisgarh",
+    st18: "Arunachal Pradesh",
+    st19: "Meghalaya",
+    st20: "Kerala",
+    st21: "Tamil Nadu",
+    st22: "Andhra Pradesh",
+    st23: "Karnataka",
+    st24: "Maharashtra",
+    st25: "Odisha",
+    st26: "Dadra and Nagar Haveli and Daman and Diu",
+    st27: "Delhi",
+    st28: "Himachal Pradesh",
+    st29: "Rajasthan",
+    st30: "Uttar Pradesh",
+    st31: "Uttarakhand",
+    st32: "Jharkhand",
+    st33: "Chandigarh",
+    st34: "Bihar",
+    st35: "Sikkim"
+};
+
+let originalIndiaViewBox = "";
+function initializeInteractiveYatraMap() {
+
+    const mapObject =
+        document.getElementById("indiaStateMap");
+
+    const statePanel =
+        document.getElementById("interactiveStatePanel");
+
+    const stateTitle =
+        document.getElementById("interactiveStateTitle");
+
+    const cityList =
+        document.getElementById("interactiveCityList");
+
+    const backButton =
+        document.getElementById("interactiveMapBack");
+
+    if (
+        !mapObject ||
+        !statePanel ||
+        !stateTitle ||
+        !cityList
+    ) {
+        console.error(
+            "❌ Interactive India Map elements not found."
+        );
+        return;
+    }
+
+
+    /* =================================================
+       LOAD SVG INLINE
+       ================================================= */
+
+    const svgUrl =
+        mapObject.getAttribute("data");
+
+    if (!svgUrl) {
+        console.error(
+            "❌ India SVG URL not found."
+        );
+        return;
+    }
+
+
+    fetch(svgUrl)
+        .then(function(response) {
+
+            if (!response.ok) {
+                throw new Error(
+                    "SVG loading failed: " +
+                    response.status
+                );
+            }
+
+            return response.text();
+        })
+
+        .then(function(svgText) {
+
+            console.log(
+    "🔎 RAW SVG HAS INBR:",
+    svgText.includes('id="INBR"')
+);
+
+console.log(
+    "🔎 RAW SVG HAS INUP:",
+    svgText.includes('id="INUP"')
+);
+            const parser =
+                new DOMParser();
+
+            const svgDocument =
+                parser.parseFromString(
+                    svgText,
+                    "image/svg+xml"
+                );
+
+            const svg =
+                svgDocument.documentElement;
+
+                originalIndiaViewBox =
+    svg.getAttribute("viewBox") || "";
+            if (
+                !svg ||
+                svg.nodeName.toLowerCase() !== "svg"
+            ) {
+                throw new Error(
+                    "Invalid India SVG."
+                );
+            }
+
+
+            /* Replace object with inline SVG */
+
+            mapObject.replaceWith(
+                svg
+            );
+
+
+            svg.id =
+                "indiaStateMap";
+
+
+            svg.style.width =
+                "100%";
+
+            svg.style.height =
+                "100%";
+
+            svg.style.display =
+                "block";
+
+            svg.style.pointerEvents =
+                "all";
+
+
+            /* =================================================
+               FIND STATES
+               ================================================= */
+
+            const paths =
+               svg.querySelectorAll(
+    "path"
+);
+            console.log(
+                "🇮🇳 SVG states found:",
+                paths.length
+            );
+
+
+            if (!paths.length) {
+                console.error(
+                    "❌ No state paths found in India SVG."
+                );
+                return;
+            }
+
+
+/* =================================================
+   STATE CLICK — INDIA.SVG
+   ================================================= */
+
+const stateLabelAliases = {
+    "Orissa": "Odisha",
+    "Uttaranchal": "Uttarakhand",
+    "Puducherry": "Puducherry",
+    "Andaman and Nicobar": "Andaman and Nicobar Islands",
+    "Dadra and Nagar Haveli": "Dadra and Nagar Haveli and Daman and Diu"
+};
+
+function normalizeStateName(name) {
+
+    name = String(name || "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    return stateLabelAliases[name] || name;
+}
+
+
+/* Get all visible state-name labels from SVG */
+
+const stateLabels = Array.from(
+    svg.querySelectorAll("text")
+)
+.filter(function(textElement) {
+
+    const text = textElement.textContent
+        .replace(/\s+/g, " ")
+        .trim();
+
+    return (
+        text &&
+        text !== "paintmaps.com"
+    );
+
+})
+.map(function(textElement) {
+
+    let box;
+
+    try {
+        box = textElement.getBBox();
+    } catch (error) {
+        return null;
+    }
+
+    return {
+        element: textElement,
+        name: normalizeStateName(
+            textElement.textContent
+        ),
+        x: box.x + box.width / 2,
+        y: box.y + box.height / 2
+    };
+
+})
+.filter(Boolean);
+
+
+/* =================================================
+   CLICKABLE STATE PATHS
+   ================================================= */
+
+paths.forEach(function(path, index) {
+
+    path.style.cursor = "pointer";
+    path.style.pointerEvents = "all";
+
+    path.style.transition =
+        "opacity 0.2s ease, filter 0.2s ease";
+
+
+    path.addEventListener(
+        "mouseenter",
+        function() {
+
+            path.style.filter =
+                "brightness(1.15)";
+
+        }
+    );
+
+
+    path.addEventListener(
+        "mouseleave",
+        function() {
+
+            path.style.filter = "";
+
+        }
+    );
+
+
+path.addEventListener(
+    "click",
+    function(event) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        console.log(
+            "🇮🇳 MAP PATH CLICKED:",
+            path.id
+        );
+
+      const stateClass =
+    Array.from(path.classList).find(cls =>
+        /^st\d+$/.test(cls)
+    );
+
+const stateName =
+    SVG_PATH_STATE_MAP[stateClass];
+            SVG_PATH_STATE_MAP[path.id];
+
+        if (!stateName) {
+
+            console.warn(
+                "⚠️ State mapping not found for SVG path:",
+                path.id
+            );
+
+            return;
+        }
+
+        console.log(
+            "🇮🇳 STATE CLICKED:",
+            stateName
+        );
+
+        showInteractiveState(
+            stateName,
+            path
+        );
+
+    },
+    true
+);
+          
+
+});
+})
+
+
+    /* =================================================
+       SHOW SELECTED STATE
+       ================================================= */
+/* =================================================
+   STEP 23.3 — STATE → CITY → FAMOUS PLACES
+   YATRA DRISHTI
+   ================================================= */
+
+function showInteractiveState(stateName, selectedPath) {
+
+        const statePanel =
+        document.getElementById("interactiveStatePanel");
+
+    const stateTitle =
+        document.getElementById("interactiveStateTitle");
+
+    const cityList =
+        document.getElementById("interactiveCityList");
+
+    const svg = document.getElementById("indiaStateMap");
+
+    if (!svg) {
+        console.error("❌ India map SVG not found.");
+        return;
+    }
+
+    /* Highlight selected state */
+    const allPaths = svg.querySelectorAll("path");
+
+    allPaths.forEach(function(path) {
+
+        path.style.opacity =
+            path === selectedPath ? "1" : "0.12";
+
+    });
+
+    
+/* Show state panel */
+statePanel.hidden = false;
+
+statePanel.style.position = "absolute";
+statePanel.style.top = "85px";
+statePanel.style.left = "20px";
+statePanel.style.right = "20px";
+statePanel.style.bottom = "20px";
+
+statePanel.style.zIndex = "100";
+
+statePanel.style.background = "rgba(255, 255, 255, 0.98)";
+statePanel.style.borderRadius = "18px";
+statePanel.style.padding = "20px";
+
+statePanel.style.boxSizing = "border-box";
+statePanel.style.overflowY = "auto";
+
+statePanel.style.boxShadow =
+    "0 15px 40px rgba(15, 23, 42, 0.20)";
+
+/* Keep state/city panel above the SVG map */
+
+
+stateTitle.innerHTML = `
+    <h3>${stateName}</h3>
+    <p>Select a city to explore famous heritage places</p>
+`;
+    cityList.innerHTML = "";
+
+    /* Get cities from STEP 23.2 */
+    const cities =
+        typeof getCitiesByState === "function"
+            ? getCitiesByState(stateName)
+            : [];
+
+    console.log("🇮🇳 Selected State:", stateName);
+    console.log("🏙️ Cities found:", cities);
+
+    /* No city available */
+    if (!cities.length) {
+
+        cityList.innerHTML = `
+            <div class="interactive-no-cities">
+                <div style="font-size:40px;">🏛️</div>
+
+                <h4>Heritage destinations coming soon</h4>
+
+                <p>
+                    More cities and heritage places will be
+                    added for ${stateName}.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+    /* Create city buttons */
+    cities.forEach(function(cityData) {
+
+        const button = document.createElement("button");
+
+        button.type = "button";
+
+        button.className =
+            "interactive-city-button";
+
+        button.innerHTML = `
+            <strong>🏙️ ${cityData.city}</strong>
+
+            <small>
+                ${cityData.famousPlaces.length}
+                famous heritage places
+            </small>
+        `;
+
+        button.addEventListener(
+            "click",
+            function() {
+
+                showCityPlaces(
+                    stateName,
+                    cityData,
+                    selectedPath
+                );
+
+            }
+        );
+
+        cityList.appendChild(button);
+
+    });
+
+}
+
+
+/* =================================================
+   STEP 23.3 — CITY → FAMOUS PLACES
+   ================================================= */
+
+function showCityPlaces(
+    stateName,
+    cityData,
+    selectedPath
+) {
+
+    stateTitle.innerHTML = `
+
+        <button
+            type="button"
+            id="interactiveBackToCities"
+            class="interactive-back-button"
+        >
+            ← Back to Cities
+        </button>
+
+        <h3>${cityData.city}</h3>
+
+        <p>
+            Famous heritage places in ${cityData.city}
+        </p>
+
+    `;
+
+    cityList.innerHTML = "";
+
+    /* Back button */
+    const backButton =
+        document.getElementById(
+            "interactiveBackToCities"
+        );
+
+    if (backButton) {
+
+        backButton.addEventListener(
+            "click",
+            function() {
+
+                showInteractiveState(
+                    stateName,
+                    selectedPath
+                );
+
+            }
+        );
+
+    }
+
+    /* Famous places */
+    const famousPlaces =
+        cityData.famousPlaces || [];
+
+    famousPlaces.forEach(
+        function(placeName) {
+
+            const button =
+                document.createElement("button");
+
+            button.type = "button";
+
+            button.className =
+                "interactive-city-button";
+
+            button.innerHTML = `
+
+                <strong>
+                    🏛️ ${placeName}
+                </strong>
+
+                <small>
+                    Explore heritage information
+                </small>
+
+            `;
+button.addEventListener(
+    "click",
+    function() {
+
+        console.log(
+            "🏛️ Heritage place selected:",
+            placeName
+        );
+
+        const places =
+            typeof getPlacesByState === "function"
+                ? getPlacesByState(stateName)
+                : [];
+
+        let heritageIndex = -1;
+
+        if (
+            places &&
+            places.length
+        ) {
+            heritageIndex =
+                places.findIndex(
+                    function(place) {
+
+                        return (
+                            place &&
+                            place[0] &&
+                            place[0]
+                                .toLowerCase()
+                                ===
+                            placeName
+                                .toLowerCase()
+                        );
+
+                    }
+                );
+        }
+
+        if (heritageIndex === -1) {
+
+            alert(
+                `❌ ${placeName} is not connected to Yatra data yet.`
+            );
+
+            return;
+        }
+
+        /*
+         * Add selected heritage place
+         * to Plan Yatra
+         */
+
+        addPlaceToYatra(
+            stateName,
+            heritageIndex
+        );
+
+    }
+);
+
+            cityList.appendChild(button);
+
+        }
+    );
+
+}
+
+    /* =================================================
+       BACK TO INDIA
+       ================================================= */
+
+    if (backButton) {
+
+        backButton.addEventListener(
+            "click",
+            function() {
+
+            
+
+
+                const svg =
+                    document.getElementById(
+                        "indiaStateMap"
+                    );
+
+                if (!svg) {
+                    return;
+                }
+
+
+               if (originalIndiaViewBox) {
+    svg.setAttribute(
+        "viewBox",
+        originalIndiaViewBox
+    );
+}
+
+                const allPaths =
+                   svg.querySelectorAll(
+    "path"
+);
+
+
+                allPaths.forEach(
+                    function(path) {
+
+                        path.style.opacity =
+                            "1";
+
+                        path.style.filter =
+                            "";
+
+                    }
+                );
+
+
+                statePanel.hidden =
+                    true;
+
+                stateTitle.innerHTML =
+                    "";
+
+                cityList.innerHTML =
+                    "";
+
+            }
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   INITIALIZE
+   ===================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        initializeInteractiveYatraMap();
+
+    }
+);
+/* =====================================================
+   STEP 23.2 — STATE → CITY DATA STRUCTURE
+   YATRA DRISHTI
+   ===================================================== */
+
+const STATE_CITY_DATA = {
+
+    "Uttar Pradesh": [
+        {
+            city: "Agra",
+            famousPlaces: [
+                "Taj Mahal",
+                "Agra Fort",
+                "Fatehpur Sikri"
+            ]
+        },
+        {
+            city: "Varanasi",
+            famousPlaces: [
+                "Kashi Vishwanath Temple",
+                "Dashashwamedh Ghat",
+                "Sarnath"
+            ]
+        },
+        {
+            city: "Mathura",
+            famousPlaces: [
+                "Shri Krishna Janmabhoomi",
+                "Dwarkadhish Temple"
+            ]
+        },
+        {
+            city: "Vrindavan",
+            famousPlaces: [
+                "Banke Bihari Temple",
+                "ISKCON Temple",
+                "Prem Mandir"
+            ]
+        },
+        {
+            city: "Ayodhya",
+            famousPlaces: [
+                "Ram Janmabhoomi",
+                "Hanuman Garhi",
+                "Kanak Bhawan"
+            ]
+        },
+        {
+            city: "Lucknow",
+            famousPlaces: [
+                "Bara Imambara",
+                "Chota Imambara",
+                "Rumi Darwaza"
+            ]
+        }
+    ],
+
+    "Rajasthan": [
+        {
+            city: "Jaipur",
+            famousPlaces: [
+                "Amber Fort",
+                "Hawa Mahal",
+                "City Palace",
+                "Jantar Mantar"
+            ]
+        },
+        {
+            city: "Jodhpur",
+            famousPlaces: [
+                "Mehrangarh Fort",
+                "Jaswant Thada"
+            ]
+        },
+        {
+            city: "Udaipur",
+            famousPlaces: [
+                "City Palace",
+                "Lake Palace",
+                "Jag Mandir"
+            ]
+        },
+        {
+            city: "Jaisalmer",
+            famousPlaces: [
+                "Jaisalmer Fort",
+                "Patwon Ki Haveli"
+            ]
+        }
+    ],
+
+    "Delhi": [
+        {
+            city: "New Delhi",
+            famousPlaces: [
+                "India Gate",
+                "Humayun's Tomb",
+                "Qutub Minar",
+                "Red Fort"
+            ]
+        }
+    ],
+
+    "Maharashtra": [
+        {
+            city: "Mumbai",
+            famousPlaces: [
+                "Gateway of India",
+                "Chhatrapati Shivaji Maharaj Terminus",
+                "Elephanta Caves"
+            ]
+        },
+        {
+            city: "Aurangabad",
+            famousPlaces: [
+                "Ajanta Caves",
+                "Ellora Caves",
+                "Bibi Ka Maqbara"
+            ]
+        }
+    ],
+
+    "Gujarat": [
+        {
+            city: "Ahmedabad",
+            famousPlaces: [
+                "Sabarmati Ashram",
+                "Adalaj Stepwell"
+            ]
+        },
+        {
+            city: "Patan",
+            famousPlaces: [
+                "Rani Ki Vav"
+            ]
+        }
+    ],
+
+    "Karnataka": [
+        {
+            city: "Hampi",
+            famousPlaces: [
+                "Virupaksha Temple",
+                "Vittala Temple",
+                "Hampi Bazaar"
+            ]
+        },
+        {
+            city: "Mysore",
+            famousPlaces: [
+                "Mysore Palace",
+                "Chamundi Hill"
+            ]
+        }
+    ],
+
+    "Tamil Nadu": [
+        {
+            city: "Chennai",
+            famousPlaces: [
+                "Kapaleeshwarar Temple",
+                "Fort St. George"
+            ]
+        },
+        {
+            city: "Thanjavur",
+            famousPlaces: [
+                "Brihadeeswarar Temple"
+            ]
+        },
+        {
+            city: "Madurai",
+            famousPlaces: [
+                "Meenakshi Amman Temple"
+            ]
+        }
+    ],
+
+    "Kerala": [
+        {
+            city: "Thiruvananthapuram",
+            famousPlaces: [
+                "Sree Padmanabhaswamy Temple"
+            ]
+        },
+        {
+            city: "Kochi",
+            famousPlaces: [
+                "Mattancherry Palace",
+                "Fort Kochi"
+            ]
+        }
+    ],
+
+    "West Bengal": [
+        {
+            city: "Kolkata",
+            famousPlaces: [
+                "Victoria Memorial",
+                "Howrah Bridge",
+                "Indian Museum"
+            ]
+        }
+    ],
+
+    "Telangana": [
+        {
+            city: "Hyderabad",
+            famousPlaces: [
+                "Charminar",
+                "Golconda Fort",
+                "Qutb Shahi Tombs"
+            ]
+        }
+    ],
+
+    "Madhya Pradesh": [
+        {
+            city: "Khajuraho",
+            famousPlaces: [
+                "Khajuraho Temples"
+            ]
+        },
+        {
+            city: "Gwalior",
+            famousPlaces: [
+                "Gwalior Fort"
+            ]
+        },
+        {
+            city: "Bhopal",
+            famousPlaces: [
+                "Sanchi Stupa"
+            ]
+        }
+    ],
+
+    "Odisha": [
+        {
+            city: "Puri",
+            famousPlaces: [
+                "Jagannath Temple"
+            ]
+        },
+        {
+            city: "Konark",
+            famousPlaces: [
+                "Konark Sun Temple"
+            ]
+        }
+    ],
+
+    "Bihar": [
+        {
+            city: "Bodh Gaya",
+            famousPlaces: [
+                "Mahabodhi Temple"
+            ]
+        },
+        {
+            city: "Patna",
+            famousPlaces: [
+                "Golghar",
+                "Patna Museum"
+            ]
+        }
+    ],
+
+    "Punjab": [
+        {
+            city: "Amritsar",
+            famousPlaces: [
+                "Golden Temple",
+                "Jallianwala Bagh"
+            ]
+        }
+    ],
+
+    "Uttarakhand": [
+        {
+            city: "Haridwar",
+            famousPlaces: [
+                "Har Ki Pauri"
+            ]
+        },
+        {
+            city: "Rishikesh",
+            famousPlaces: [
+                "Ram Jhula",
+                "Lakshman Jhula",
+                "Triveni Ghat"
+            ]
+        }
+    ],
+
+    "Goa": [
+        {
+            city: "Old Goa",
+            famousPlaces: [
+                "Basilica of Bom Jesus",
+                "Se Cathedral"
+            ]
+        }
+    ]
+};
+
+
+/* =====================================================
+   STEP 23.2 — HELPER FUNCTION
+   GET CITIES OF A STATE
+   ===================================================== */
+
+function getCitiesByState(stateName) {
+
+    if (!stateName) {
+        return [];
+    }
+
+    return STATE_CITY_DATA[stateName] || [];
+}
+
+
+console.log(
+    "✅ Step 23.2 State → City data loaded:",
+    STATE_CITY_DATA
+);
+
+/* =========================================
+   HERITAGE ISSUE REPORT — PHOTO CAPTURE
+========================================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const issuePhotoBtn =
+        document.getElementById("issuePhotoBtn");
+
+    const issuePhotoInput =
+        document.getElementById("issuePhotoInput");
+
+    const placePhotoBtn =
+        document.getElementById("placePhotoBtn");
+
+    const placePhotoInput =
+        document.getElementById("placePhotoInput");
+
+
+    /* ISSUE PHOTO */
+    if (issuePhotoBtn && issuePhotoInput) {
+
+        issuePhotoBtn.addEventListener("click", function () {
+            issuePhotoInput.click();
+        });
+
+    }
+
+
+    /* HERITAGE PLACE PHOTO */
+    if (placePhotoBtn && placePhotoInput) {
+
+        placePhotoBtn.addEventListener("click", function () {
+            placePhotoInput.click();
+        });
+
+    }
+
+});
+/* =========================================
+   HERITAGE ISSUE REPORT — OPEN / CLOSE
+========================================= */
+
+function openHeritageIssueReport() {
+    const report = document.getElementById("report-issue");
+
+    if (!report) return;
+
+    report.hidden = false;
+    report.classList.add("active");
+    document.body.style.overflow = "hidden";
+}
+
+function closeHeritageIssueReport() {
+    const report = document.getElementById("report-issue");
+
+    if (!report) return;
+
+    report.classList.remove("active");
+    report.hidden = true;
+    document.body.style.overflow = "";
+}
+/* =========================================
+   HERITAGE REPORT — PHOTO PREVIEW
+========================================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const issueInput = document.getElementById("issuePhotoInput");
+    const placeInput = document.getElementById("placePhotoInput");
+
+    const issuePreview = document.getElementById("issuePhotoPreview");
+    const placePreview = document.getElementById("placePhotoPreview");
+
+    function showPhoto(input, preview) {
+        if (!input || !preview) return;
+
+        input.addEventListener("change", function () {
+
+            const file = input.files[0];
+
+            if (!file) return;
+
+            const imageURL = URL.createObjectURL(file);
+
+            preview.innerHTML = `
+                <img src="${imageURL}" alt="Selected photo">
+                <span>✓ Photo Added</span>
+            `;
+        });
+    }
+
+    showPhoto(issueInput, issuePreview);
+    showPhoto(placeInput, placePreview);
+
+});
+/* =========================================
+   HERITAGE REPORT — PREVIEW
+========================================= */
+
+function previewHeritageReport() {
+
+    const place =
+        document.getElementById("heritagePlaceInput")?.value.trim();
+
+    const issueType =
+        document.getElementById("issueTypeSelect")?.value;
+
+    const description =
+        document.getElementById("issueDescription")?.value.trim();
+
+    const preview =
+        document.getElementById("reportPreviewContent");
+
+    if (!preview) return;
+
+    if (!place) {
+        alert("Please enter the heritage place name.");
+        return;
+    }
+
+    if (!issueType) {
+        alert("Please select the issue type.");
+        return;
+    }
+
+    if (!description) {
+        alert("Please describe the issue.");
+        return;
+    }
+
+    const issuePhoto =
+        document.getElementById("issuePhotoInput")?.files[0];
+
+    const placePhoto =
+        document.getElementById("placePhotoInput")?.files[0];
+
+    if (!issuePhoto) {
+        alert("Please capture the issue photo.");
+        return;
+    }
+
+    if (!placePhoto) {
+        alert("Please capture the heritage place photo.");
+        return;
+    }
+
+    preview.innerHTML = `
+        <p><strong>🏛️ Heritage Place:</strong> ${place}</p>
+        <p><strong>⚠️ Issue Type:</strong> ${issueType}</p>
+        <p><strong>📝 Description:</strong> ${description}</p>
+        <p><strong>📷 Issue Photo:</strong> ✓ Added</p>
+        <p><strong>🏛️ Place Photo:</strong> ✓ Added</p>
+    `;
+}
+/* =========================================
+   HERITAGE REPORT — FINAL SUBMIT
+========================================= */
+
+function submitHeritageReport() {
+
+    const place =
+        document.getElementById("heritagePlaceInput")?.value.trim();
+
+    const issueType =
+        document.getElementById("issueTypeSelect")?.value;
+
+    const description =
+        document.getElementById("issueDescription")?.value.trim();
+
+    const issuePhoto =
+        document.getElementById("issuePhotoInput")?.files[0];
+
+    const placePhoto =
+        document.getElementById("placePhotoInput")?.files[0];
+
+    const message =
+        document.getElementById("reportSubmitMessage");
+
+    if (!place || !issueType || !description || !issuePhoto || !placePhoto) {
+        alert("Please complete all report details before submitting.");
+        return;
+    }
+
+    if (message) {
+        message.innerHTML = `
+            ✓ Report prepared successfully.
+            <br>
+            Your report is ready to be submitted to the heritage authority.
+        `;
+    }
 }

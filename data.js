@@ -772,7 +772,7 @@ const CULTURE_DATA = [
         description:
             "Rajasthan's folk music reflects the stories, traditions and everyday life of the desert communities.",
 
-        video:"https://www.youtube.com/embed/S-qCqe95VeU?si=8cHbcOempcISrcsN",
+        video:"https://www.youtube.com/embed/uB6benL7q2Q?si=7zeX3pgal6nAkYGi" ,
 
         tags:
             ["music", "rajasthan", "folk", "desert"]
@@ -794,7 +794,7 @@ const CULTURE_DATA = [
             "Discover India's incredible culinary diversity, from North Indian spices to South Indian flavours.",
 
         video:
-            "https://www.youtube.com/embed/VIDEO_ID",
+            "https://www.youtube.com/embed/5uwhqsivzHE?si=h3CFQOi2Q7FawdMn" ,
 
         tags:
             ["food", "cuisine", "indian food"]
@@ -816,7 +816,7 @@ const CULTURE_DATA = [
             "Banarasi silk weaving is known for intricate patterns, rich colours and traditional craftsmanship.",
 
         video:
-            "https://www.youtube.com/embed/VIDEO_ID",
+            "https://www.youtube.com/embed/k_JNaO7a0wI?si=71LtOaxMb__NPt_u",
 
         tags:
             ["craft", "silk", "banaras", "weaving"]
@@ -838,7 +838,7 @@ const CULTURE_DATA = [
             "Warli painting uses simple geometric forms to depict nature, community life and traditions.",
 
         video:
-            "https://www.youtube.com/embed/VIDEO_ID",
+            "https://www.youtube.com/embed/5-PrZ8PyeX8?si=iCYY5-V5xjjIBjFP",
 
         tags:
             ["art", "warli", "maharashtra", "painting"]
@@ -860,13 +860,12 @@ const CULTURE_DATA = [
             "Yoga represents an ancient Indian tradition connecting physical practice, breathing and mindfulness.",
 
         video:
-            "https://www.youtube.com/embed/VIDEO_ID",
+            "https://www.youtube.com/embed/K-GJh9GeOxE?si=q2ArgJuGhjilgUUi" ,
 
         tags:
             ["yoga", "wellness", "tradition"]
 
     },
-
 
     {
         id: 9,
@@ -882,7 +881,7 @@ const CULTURE_DATA = [
             "Odissi is a classical dance form of Odisha known for graceful movements and expressive storytelling.",
 
         video:
-            "https://www.youtube.com/embed/VIDEO_ID",
+            "https://www.youtube.com/embed/-tAmSrLGAYM?si=r1OrS19F-fNb_Qe3" ,
 
         tags:
             ["dance", "odissi", "odisha"]
@@ -904,7 +903,7 @@ const CULTURE_DATA = [
             "Madhubani painting is a vibrant traditional art form featuring nature, mythology and geometric patterns.",
 
         video:
-            "https://www.youtube.com/embed/VIDEO_ID",
+            "https://www.youtube.com/embed/24JKljJazD4?si=cqVsWS9rwi8khueN",
 
         tags:
             ["art", "madhubani", "bihar", "painting"]
@@ -912,6 +911,126 @@ const CULTURE_DATA = [
     }
 
 ];
+
+/* ========================================
+   STORIES OF BHARAT
+========================================= */
+
+const STORIES_OF_BHARAT = [
+
+    {
+        id: 1,
+        title: "The Story of Taj Mahal",
+        category: "HERITAGE STORY",
+        description:
+            "Discover the history and architecture behind one of India's most iconic monuments.",
+        duration: "04:32",
+        image: "assets/images/taj-mahal.jpg",
+        video: "YOUR_TAJ_MAHAL_VIDEO_URL"
+    },
+
+    {
+        id: 2,
+        title: "The Soul of Kashi",
+        category: "SPIRITUAL INDIA",
+        description:
+            "Explore the timeless spiritual heritage of Varanasi.",
+        duration: "06:18",
+        image: "assets/images/indian-culture.jpg",
+        video: "YOUR_KASHI_VIDEO_URL"
+    },
+
+    {
+        id: 3,
+        title: "Royal Rajasthan",
+        category: "ROYAL HERITAGE",
+        description:
+            "Journey through magnificent forts and palaces.",
+        duration: "05:45",
+        image: "assets/images/forts.jpg",
+        video: "YOUR_RAJASTHAN_VIDEO_URL"
+    },
+
+    {
+        id: 4,
+        title: "The Lost Empire of Hampi",
+        category: "ANCIENT INDIA",
+        description:
+            "Discover the extraordinary ruins of Vijayanagara.",
+        duration: "07:20",
+        image: "assets/images/hampi.jpg",
+        video: "YOUR_HAMPI_VIDEO_URL"
+    }
+
+];
+/* =========================================
+   HERITAGE STORIES
+========================================= */
+
+const HERITAGE_STORIES = [
+
+    {
+        id: 1,
+        title: "The Timeless Taj Mahal",
+        category: "MONUMENTS",
+        description:
+            "Discover the timeless beauty and architectural story of the Taj Mahal.",
+        image: "assets/images/taj-mahal.jpg",
+        video: "YOUR_TAJ_MAHAL_VIDEO_URL"
+    },
+
+    {
+        id: 2,
+        title: "The Spirit of Indian Culture",
+        category: "CULTURE",
+        description:
+            "Experience the colours, traditions and cultural diversity of Bharat.",
+        image: "assets/images/indian-culture.jpg",
+        video: "YOUR_INDIAN_CULTURE_VIDEO_URL"
+    },
+
+    {
+        id: 3,
+        title: "Festival of Lights",
+        category: "FESTIVALS",
+        description:
+            "Explore the traditions and celebrations of Diwali across India.",
+        image: "assets/images/diwali.jpg",
+        video: "https://www.youtube.com/embed/HrrW3rO51ak"
+    },
+
+    {
+        id: 4,
+        title: "Sacred Temples of Bharat",
+        category: "TEMPLES",
+        description:
+            "Journey through India's magnificent temples and spiritual heritage.",
+        image: "assets/images/temples.jpg",
+        video: "YOUR_TEMPLES_VIDEO_URL"
+    },
+
+    {
+        id: 5,
+        title: "The Legacy of Indian Forts",
+        category: "MONUMENTS",
+        description:
+            "Explore the historic forts that tell stories of India's glorious past.",
+        image: "assets/images/forts.jpg",
+        video: "YOUR_FORTS_VIDEO_URL"
+    },
+
+    {
+        id: 6,
+        title: "Colours of Indian Festivals",
+        category: "FESTIVALS",
+        description:
+            "A colourful journey through India's vibrant festivals.",
+        image: "assets/images/festivals.jpg",
+        video: "YOUR_FESTIVALS_VIDEO_URL"
+    }
+
+];
+
 
 
 /* =========================================
@@ -1010,3 +1129,240 @@ const CULTURE_FACTS = [
     }
 
 ];
+
+/* =====================================================
+   STEP 23.2 — STATE → CITY → FAMOUS HERITAGE PLACES
+   ===================================================== */
+
+const HERITAGE_CITY_DATA = {
+
+    "Uttar Pradesh": {
+
+        "Agra": [
+            "Taj Mahal",
+            "Agra Fort",
+            "Fatehpur Sikri"
+        ],
+
+        "Varanasi": [
+            "Sarnath",
+            "Kashi Vishwanath Temple"
+        ],
+
+        "Lucknow": [
+            "Bara Imambara"
+        ],
+
+        "Jhansi": [
+            "Jhansi Fort"
+        ],
+
+        "Mathura": [
+            "Mathura"
+        ],
+
+        "Vrindavan": [
+            "Vrindavan"
+        ],
+
+        "Ayodhya": [
+            "Ayodhya"
+        ]
+
+    }
+
+};
+
+// ============================================================
+// FOOD FALLBACK DATA
+// Supabase Food API fail/empty hone par ye data use hoga
+// ============================================================
+
+const FOOD_DATA = {
+    "Andaman and Nicobar Islands": [
+        { id: "food-fallback-1", name: "Coconut Prawn Curry", category: "Food", state: "Andaman and Nicobar Islands", location: "Andaman and Nicobar Islands", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" },
+        { id: "food-fallback-2", name: "Fish Curry Rice", category: "Food", state: "Andaman and Nicobar Islands", location: "Andaman and Nicobar Islands", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" }
+    ],
+
+    "Andhra Pradesh": [
+        { id: "food-fallback-3", name: "Pootharekulu", category: "Food", state: "Andhra Pradesh", location: "Andhra Pradesh", food_type: "Sweet", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-4", name: "Gongura Pachadi", category: "Food", state: "Andhra Pradesh", location: "Andhra Pradesh", food_type: "Chutney", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Arunachal Pradesh": [
+        { id: "food-fallback-5", name: "Thukpa", category: "Food", state: "Arunachal Pradesh", location: "Arunachal Pradesh", food_type: "Main Course", veg_nonveg: "", price_range: "" },
+        { id: "food-fallback-6", name: "Bamboo Shoot Chicken", category: "Food", state: "Arunachal Pradesh", location: "Arunachal Pradesh", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" }
+    ],
+
+    "Assam": [
+        { id: "food-fallback-7", name: "Masor Tenga", category: "Food", state: "Assam", location: "Assam", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" },
+        { id: "food-fallback-8", name: "Pitha", category: "Food", state: "Assam", location: "Assam", food_type: "Sweet", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Bihar": [
+        { id: "food-fallback-9", name: "Litti Chokha", category: "Food", state: "Bihar", location: "Bihar", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-10", name: "Sattu Paratha", category: "Food", state: "Bihar", location: "Bihar", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Chandigarh": [
+        { id: "food-fallback-11", name: "Chole Bhature", category: "Food", state: "Chandigarh", location: "Chandigarh", food_type: "Street Food", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-12", name: "Amritsari Fish", category: "Food", state: "Chandigarh", location: "Chandigarh", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" }
+    ],
+
+    "Chhattisgarh": [
+        { id: "food-fallback-13", name: "Faraa", category: "Food", state: "Chhattisgarh", location: "Chhattisgarh", food_type: "Snack", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-14", name: "Chila", category: "Food", state: "Chhattisgarh", location: "Chhattisgarh", food_type: "Snack", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Dadra and Nagar Haveli and Daman and Diu": [
+        { id: "food-fallback-15", name: "Papri", category: "Food", state: "Dadra and Nagar Haveli and Daman and Diu", location: "Dadra and Nagar Haveli and Daman and Diu", food_type: "Snack", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-16", name: "Chicken Xacuti", category: "Food", state: "Dadra and Nagar Haveli and Daman and Diu", location: "Dadra and Nagar Haveli and Daman and Diu", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" }
+    ],
+
+    "Delhi": [
+        { id: "food-fallback-17", name: "Chole Bhature", category: "Food", state: "Delhi", location: "Delhi", food_type: "Street Food", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-18", name: "Aloo Tikki", category: "Food", state: "Delhi", location: "Delhi", food_type: "Street Food", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Goa": [
+        { id: "food-fallback-19", name: "Goan Fish Curry", category: "Food", state: "Goa", location: "Goa", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" },
+        { id: "food-fallback-20", name: "Bebinca", category: "Food", state: "Goa", location: "Goa", food_type: "Sweet", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Gujarat": [
+        { id: "food-fallback-21", name: "Dhokla", category: "Food", state: "Gujarat", location: "Gujarat", food_type: "Snack", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-22", name: "Undhiyu", category: "Food", state: "Gujarat", location: "Gujarat", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Haryana": [
+        { id: "food-fallback-23", name: "Bajra Khichdi", category: "Food", state: "Haryana", location: "Haryana", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-24", name: "Bajra Roti", category: "Food", state: "Haryana", location: "Haryana", food_type: "Bread", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Himachal Pradesh": [
+        { id: "food-fallback-25", name: "Dham", category: "Food", state: "Himachal Pradesh", location: "Himachal Pradesh", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-26", name: "Siddu", category: "Food", state: "Himachal Pradesh", location: "Himachal Pradesh", food_type: "Snack", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Jammu and Kashmir": [
+        { id: "food-fallback-27", name: "Rogan Josh", category: "Food", state: "Jammu and Kashmir", location: "Jammu and Kashmir", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" },
+        { id: "food-fallback-28", name: "Kaladi Kulcha", category: "Food", state: "Jammu and Kashmir", location: "Jammu and Kashmir", food_type: "Snack", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Jharkhand": [
+        { id: "food-fallback-29", name: "Dhuska", category: "Food", state: "Jharkhand", location: "Jharkhand", food_type: "Snack", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-30", name: "Thekua", category: "Food", state: "Jharkhand", location: "Jharkhand", food_type: "Sweet", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Karnataka": [
+        { id: "food-fallback-31", name: "Bisi Bele Bath", category: "Food", state: "Karnataka", location: "Karnataka", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-32", name: "Mysore Pak", category: "Food", state: "Karnataka", location: "Karnataka", food_type: "Sweet", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Kerala": [
+        { id: "food-fallback-33", name: "Appam with Stew", category: "Food", state: "Kerala", location: "Kerala", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-34", name: "Puttu and Kadala Curry", category: "Food", state: "Kerala", location: "Kerala", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Ladakh": [
+        { id: "food-fallback-35", name: "Thukpa", category: "Food", state: "Ladakh", location: "Ladakh", food_type: "Main Course", veg_nonveg: "", price_range: "" },
+        { id: "food-fallback-36", name: "Momos", category: "Food", state: "Ladakh", location: "Ladakh", food_type: "Snack", veg_nonveg: "", price_range: "" }
+    ],
+
+    "Lakshadweep": [
+        { id: "food-fallback-37", name: "Tuna Curry", category: "Food", state: "Lakshadweep", location: "Lakshadweep", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" },
+        { id: "food-fallback-38", name: "Coconut Rice", category: "Food", state: "Lakshadweep", location: "Lakshadweep", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Madhya Pradesh": [
+        { id: "food-fallback-39", name: "Poha", category: "Food", state: "Madhya Pradesh", location: "Madhya Pradesh", food_type: "Breakfast", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-40", name: "Bhutte Ka Kees", category: "Food", state: "Madhya Pradesh", location: "Madhya Pradesh", food_type: "Snack", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Maharashtra": [
+        { id: "food-fallback-41", name: "Vada Pav", category: "Food", state: "Maharashtra", location: "Maharashtra", food_type: "Street Food", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-42", name: "Puran Poli", category: "Food", state: "Maharashtra", location: "Maharashtra", food_type: "Sweet", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Manipur": [
+        { id: "food-fallback-43", name: "Eromba", category: "Food", state: "Manipur", location: "Manipur", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-44", name: "Singju", category: "Food", state: "Manipur", location: "Manipur", food_type: "Salad", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Meghalaya": [
+        { id: "food-fallback-45", name: "Jadoh", category: "Food", state: "Meghalaya", location: "Meghalaya", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" },
+        { id: "food-fallback-46", name: "Doh Khlieh", category: "Food", state: "Meghalaya", location: "Meghalaya", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" }
+    ],
+
+    "Mizoram": [
+        { id: "food-fallback-47", name: "Bai", category: "Food", state: "Mizoram", location: "Mizoram", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-48", name: "Misa Mach Poora", category: "Food", state: "Mizoram", location: "Mizoram", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" }
+    ],
+
+    "Nagaland": [
+        { id: "food-fallback-49", name: "Smoked Pork with Bamboo Shoot", category: "Food", state: "Nagaland", location: "Nagaland", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" },
+        { id: "food-fallback-50", name: "Akhuni Chutney", category: "Food", state: "Nagaland", location: "Nagaland", food_type: "Chutney", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Odisha": [
+        { id: "food-fallback-51", name: "Chhena Poda", category: "Food", state: "Odisha", location: "Odisha", food_type: "Sweet", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-52", name: "Dalma", category: "Food", state: "Odisha", location: "Odisha", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Puducherry": [
+        { id: "food-fallback-53", name: "Pondicherry Fish Curry", category: "Food", state: "Puducherry", location: "Puducherry", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" },
+        { id: "food-fallback-54", name: "Baguette with Local Curry", category: "Food", state: "Puducherry", location: "Puducherry", food_type: "Main Course", veg_nonveg: "", price_range: "" }
+    ],
+
+    "Punjab": [
+        { id: "food-fallback-55", name: "Amritsari Kulcha", category: "Food", state: "Punjab", location: "Punjab", food_type: "Bread", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-56", name: "Sarson Da Saag with Makki Di Roti", category: "Food", state: "Punjab", location: "Punjab", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Rajasthan": [
+        { id: "food-fallback-57", name: "Dal Baati Churma", category: "Food", state: "Rajasthan", location: "Rajasthan", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-58", name: "Ghewar", category: "Food", state: "Rajasthan", location: "Rajasthan", food_type: "Sweet", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Sikkim": [
+        { id: "food-fallback-59", name: "Momos", category: "Food", state: "Sikkim", location: "Sikkim", food_type: "Snack", veg_nonveg: "", price_range: "" },
+        { id: "food-fallback-60", name: "Thukpa", category: "Food", state: "Sikkim", location: "Sikkim", food_type: "Main Course", veg_nonveg: "", price_range: "" }
+    ],
+
+    "Tamil Nadu": [
+        { id: "food-fallback-61", name: "Pongal", category: "Food", state: "Tamil Nadu", location: "Tamil Nadu", food_type: "Breakfast", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-62", name: "Idli Sambar", category: "Food", state: "Tamil Nadu", location: "Tamil Nadu", food_type: "Breakfast", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Telangana": [
+        { id: "food-fallback-63", name: "Hyderabadi Biryani", category: "Food", state: "Telangana", location: "Hyderabad", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" },
+        { id: "food-fallback-64", name: "Sarva Pindi", category: "Food", state: "Telangana", location: "Telangana", food_type: "Snack", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Tripura": [
+        { id: "food-fallback-65", name: "Mui Borok", category: "Food", state: "Tripura", location: "Tripura", food_type: "Main Course", veg_nonveg: "", price_range: "" },
+        { id: "food-fallback-66", name: "Chakhwi", category: "Food", state: "Tripura", location: "Tripura", food_type: "Main Course", veg_nonveg: "", price_range: "" }
+    ],
+
+    "Uttar Pradesh": [
+        { id: "food-fallback-67", name: "Tunday Kababi", category: "Food", state: "Uttar Pradesh", location: "Lucknow", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" },
+        { id: "food-fallback-68", name: "Banarasi Chaat", category: "Food", state: "Uttar Pradesh", location: "Varanasi", food_type: "Street Food", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "Uttarakhand": [
+        { id: "food-fallback-69", name: "Aloo Ke Gutke", category: "Food", state: "Uttarakhand", location: "Uttarakhand", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-70", name: "Kafuli", category: "Food", state: "Uttarakhand", location: "Uttarakhand", food_type: "Main Course", veg_nonveg: "Veg", price_range: "" }
+    ],
+
+    "West Bengal": [
+        { id: "food-fallback-71", name: "Rasgulla", category: "Food", state: "West Bengal", location: "West Bengal", food_type: "Sweet", veg_nonveg: "Veg", price_range: "" },
+        { id: "food-fallback-72", name: "Kosha Mangsho", category: "Food", state: "West Bengal", location: "West Bengal", food_type: "Main Course", veg_nonveg: "Non-Veg", price_range: "" }
+    ]
+};
+
+if (typeof module !== "undefined") {
+    module.exports = {
+        INDIA_HERITAGE,
+        FOOD_DATA
+    };
+}

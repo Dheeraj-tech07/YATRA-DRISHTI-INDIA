@@ -1,0 +1,292 @@
+/* =========================================
+   YATRA DRISHTI — MOBILE RESPONSIVE
+   STEP 3
+========================================= */
+
+/* ---------- MOBILE MENU BUTTON ---------- */
+
+.mobile-menu-toggle {
+    display: none;
+}
+
+
+/* =========================================
+   TABLET + MOBILE
+========================================= */
+
+@media (max-width: 850px) {
+
+    .navbar {
+        position: relative;
+        z-index: 1000;
+    }
+
+    /* Hide desktop navigation */
+    .navbar .nav-menu {
+        display: none;
+    }
+
+    /* Show hamburger */
+    .mobile-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 44px;
+        height: 44px;
+
+        border: none;
+        border-radius: 12px;
+
+        background: rgba(255, 255, 255, 0.12);
+        color: inherit;
+
+        font-size: 24px;
+        cursor: pointer;
+
+        flex-shrink: 0;
+    }
+
+}
+
+
+/* =========================================
+   SMALL PHONE
+========================================= */
+
+@media (max-width: 550px) {
+
+    .mobile-menu-toggle {
+        width: 40px;
+        height: 40px;
+        font-size: 22px;
+    }
+
+}
+
+/* =========================================
+   MOBILE LEFT SIDE MENU
+========================================= */
+
+@media (max-width: 850px) {
+
+    .navbar .nav-menu {
+        display: flex;
+
+        position: fixed;
+        top: 0;
+        left: 0;
+
+        width: min(82vw, 320px);
+        height: 100dvh;
+
+        padding: 90px 18px 25px;
+
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+
+        background: #ffffff;
+
+        box-shadow: 12px 0 35px rgba(0, 0, 0, 0.18);
+
+        z-index: 2001;
+
+        overflow-y: auto;
+
+        transform: translateX(-105%);
+        transition: transform 0.3s ease;
+    }
+
+    .navbar .nav-menu.mobile-open {
+        transform: translateX(0);
+    }
+
+    .navbar .nav-menu .nav-link {
+        display: flex;
+        align-items: center;
+
+        width: 100%;
+        min-height: 48px;
+
+        padding: 12px 14px;
+
+        border-radius: 10px;
+
+        white-space: normal;
+    }
+
+    /* Background overlay */
+    .mobile-menu-overlay {
+        display: none;
+
+        position: fixed;
+        inset: 0;
+
+        background: rgba(0, 0, 0, 0.45);
+
+        z-index: 2000;
+    }
+
+    .mobile-menu-overlay.show {
+        display: block;
+    }
+
+    /* Keep language button available on mobile */
+    .nav-actions .language-btn {
+        display: flex;
+    }
+}
+
+/* =========================================
+   STEP 6 — PREMIUM MOBILE HOME / HERO
+========================================= */
+
+@media (max-width: 850px) {
+
+    /* Hero overall */
+    .hero {
+        min-height: 720px;
+        padding: 85px 22px 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* Keep video cinematic on phone */
+    .hero-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+
+    /* Hero content */
+    .hero-content {
+        width: 100%;
+        max-width: 100%;
+        margin-top: 0;
+        z-index: 2;
+    }
+
+    /* Small heading above main title */
+    .hero-eyebrow {
+        margin-bottom: 14px;
+        font-size: 10px;
+        letter-spacing: 1.6px;
+        line-height: 1.5;
+    }
+
+    /* Main title */
+    .hero h1 {
+        font-size: clamp(38px, 11vw, 52px);
+        line-height: 1.02;
+        letter-spacing: -1.5px;
+    }
+
+    /* Description */
+    .hero-content p {
+        max-width: 100%;
+        margin: 20px 0 25px;
+        font-size: 14px;
+        line-height: 1.65;
+    }
+
+    /* Buttons */
+    .hero-buttons {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .hero-btn {
+        width: 100%;
+        min-height: 48px;
+        padding: 0 18px;
+        font-size: 13px;
+        border-radius: 11px;
+    }
+
+    /* Bottom statistics */
+    .hero-stats {
+        width: 100%;
+        margin-top: 32px;
+        padding: 10px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1px;
+        border-radius: 16px;
+    }
+
+    .hero-stats div {
+        min-width: 0;
+        padding: 12px 7px;
+    }
+
+    .hero-stats strong {
+        font-size: 18px;
+    }
+
+    .hero-stats span {
+        font-size: 9px;
+        line-height: 1.3;
+    }
+
+    /* Scroll indicator */
+    .hero-scroll {
+        display: none;
+    }
+}
+
+
+/* =========================================
+   SMALL PHONES
+========================================= */
+
+@media (max-width: 550px) {
+
+    .hero {
+        min-height: 700px;
+        padding: 78px 18px 25px;
+    }
+
+    .hero-eyebrow {
+        font-size: 9px;
+        letter-spacing: 1.3px;
+    }
+
+    .hero h1 {
+        font-size: clamp(36px, 10.5vw, 46px);
+        letter-spacing: -1.2px;
+    }
+
+    .hero-content p {
+        font-size: 13px;
+        line-height: 1.6;
+        margin: 18px 0 22px;
+    }
+
+    .hero-btn {
+        min-height: 46px;
+        font-size: 12px;
+    }
+
+    .hero-stats {
+        margin-top: 26px;
+        padding: 8px;
+        border-radius: 14px;
+    }
+
+    .hero-stats div {
+        padding: 10px 5px;
+    }
+
+    .hero-stats strong {
+        font-size: 17px;
+    }
+
+    .hero-stats span {
+        font-size: 8px;
+    }
+}

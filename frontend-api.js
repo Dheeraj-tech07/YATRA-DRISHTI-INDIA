@@ -3,6 +3,18 @@
 
     // Local development ke liye Express server ka single API base URL.
     const API_BASE_URL = "http://localhost:5000/api";
+
+
+ window.loadHeritageFromBackend = async function () {
+    const response = await fetch(`${API_BASE_URL}/heritage`);
+
+    if (!response.ok) {
+        throw new Error("Heritage data load nahi hua.");
+    }
+
+    return await response.json();
+};
+
     const searchInput = document.getElementById("heritageSearch");
     const searchButton = document.getElementById("heritageSearchBtn");
     const resultsContainer = document.getElementById("heritageResults");
