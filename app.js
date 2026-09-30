@@ -2,7 +2,7 @@
    YATRA DRISHTI
    STEP 2 - EXPLORE INDIA ENGINE
 ========================================= */
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = "https://yatra-drishti-api.onrender.com/api";
 let backendHeritageData = [];
 async function initializeBackendHeritage() {
     try {
