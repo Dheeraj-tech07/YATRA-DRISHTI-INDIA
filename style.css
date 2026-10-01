@@ -13288,3 +13288,42 @@ overflow: hidden;
     border-color: #2563eb !important;
     background: #ffffff !important;
 }
+
+/* Compact heritage cards — keep images large */
+.heritage-card {
+    padding: 12px !important;
+}
+
+/* Image size stays unchanged */
+.heritage-card-image {
+    height: 220px !important;
+    min-height: 220px !important;
+    margin-bottom: 6px !important;
+}
+
+/* Reduce text spacing */
+.heritage-card-content h3 {
+    margin: 4px 0 !important;
+    line-height: 1.2 !important;
+}
+
+.heritage-card-location {
+    margin: 3px 0 !important;
+    line-height: 1.3 !important;
+}
+
+.heritage-card .recommendation {
+    margin: 5px 0 !important;
+    padding: 6px 9px !important;
+}
+
+/* Reduce gap before and between buttons */
+.heritage-card-actions {
+    margin-top: 7px !important;
+    gap: 6px !important;
+}
+
+.heritage-card-actions button {
+    min-height: 38px !important;
+    padding: 7px 9px !important;
+}
