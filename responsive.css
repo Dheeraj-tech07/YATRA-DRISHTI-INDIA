@@ -290,3 +290,11 @@
         font-size: 8px;
     }
 }
+
+@media (max-width: 850px) {
+    html,
+    body {
+        max-width: 100%;
+        overflow-x: clip;
+    }
+}
