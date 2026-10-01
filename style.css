@@ -465,7 +465,7 @@ button {
 
     transform: scale(1.01);
 
-    filter: saturate(.9) contrast(1.05);
+    filter: none;
 
     animation: videoZoom 18s ease-in-out infinite alternate;
 }
@@ -491,24 +491,19 @@ button {
 ===================================================== */
 
 .hero-overlay {
-
     position: absolute;
-
     inset: 0;
-
     z-index: 1;
 
     background:
         linear-gradient(
             90deg,
-            rgba(3, 21, 32, .90) 0%,
-            rgba(3, 21, 32, .72) 35%,
-            rgba(3, 21, 32, .38) 70%,
-            rgba(3, 21, 32, .18) 100%
+            rgba(3, 21, 32, .45) 0%,
+            rgba(3, 21, 32, .28) 35%,
+            rgba(3, 21, 32, .10) 70%,
+            rgba(3, 21, 32, .04) 100%
         );
-
 }
-
 
 /* Bottom cinematic fade */
 
@@ -527,7 +522,7 @@ button {
     background:
         linear-gradient(
             to top,
-            rgba(3, 20, 30, .82),
+            rgba(3, 20, 30, .35),
             transparent
         );
 
@@ -1074,7 +1069,7 @@ button {
 
     .hero-video {
 
-        transform: scale(1.15);
+        transform: scale(1.01);
 
     }
 
