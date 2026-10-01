@@ -1164,7 +1164,7 @@ console.log(
         height:220px;
         overflow:hidden;
         border-radius:18px;
-        margin:0 0 20px 0;
+        margin:0 0 6px 0;
         background:linear-gradient(135deg, #fff3e0, #f8e4c8);
         display:flex;
         align-items:center;
