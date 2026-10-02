@@ -298,3 +298,20 @@
         overflow-x: clip;
     }
 }
+/* MOBILE MENU — LAYERING FIX */
+@media (max-width: 850px) {
+
+    .navbar {
+        position: relative;
+        z-index: 3002;
+    }
+
+    .navbar .nav-menu {
+        position: fixed;
+        z-index: 3003;
+    }
+
+    .mobile-menu-overlay {
+        z-index: 3001;
+    }
+}
