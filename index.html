@@ -2659,43 +2659,38 @@
                     Cancel
                 </button>
 
+                <!-- SHARE FEEDBACK — MY PROFILE -->
+<div class="profile-feedback-card">
+
+    <div class="profile-card-heading">
+        <div>
+            <span>💬 YOUR VOICE MATTERS</span>
+            <h3>Share <span>Feedback</span></h3>
+        </div>
+    </div>
+
+    <p>Yatra Drishti ko aur useful banane ke liye apna feedback bhejein.</p>
+
+    <form id="detailsForm" class="feedback-form">
+        <input type="text" name="name" placeholder="Your name" required>
+
+        <input type="email" name="email" placeholder="Email (optional)">
+
+        <textarea name="details" rows="4" placeholder="Your feedback" required></textarea>
+
+        <button type="submit">Submit Feedback</button>
+
+        <p id="feedbackStatus" role="status" aria-live="polite"></p>
+    </form>
+
+</div>
+
             </div>
 
         </div>
     </div>
 
-    <div class="profile-edit-box">
-
-        <button type="button" class="profile-edit-close" onclick="closeProfileEdit()">
-            ×
-        </button>
-
-        <span>👤 PROFILE</span>
-
-        <h3>Edit Your Profile</h3>
-
-        <label for="profileNameInput">
-            Your Name
-        </label>
-
-        <input id="profileNameInput" type="text" placeholder="Enter your name" maxlength="30">
-
-        <div class="profile-edit-buttons">
-
-            <button type="button" onclick="saveProfileName()">
-                Save
-            </button>
-
-            <button type="button" onclick="closeProfileEdit()">
-                Cancel
-            </button>
-
-        </div>
-
-    </div>
-
-    </div>
-
+  
     <!-- =========================
          FOOTER
     ========================== -->
@@ -2780,23 +2775,6 @@
         </div>
 
     </footer>
-
-    <!-- SIH feedback form: isse backend ke /api/feedback endpoint se connect kiya gaya hai. -->
-    <section id="feedback" class="section feedback-section">
-        <div class="section-heading">
-            <span>YOUR VOICE MATTERS</span>
-            <h2>Share Feedback</h2>
-            <p>Yatra Drishti ko aur useful banane ke liye apna feedback bhejein.</p>
-        </div>
-        <form id="detailsForm" class="feedback-form">
-            <input type="text" name="name" placeholder="Your name" required>
-            <input type="email" name="email" placeholder="Email (optional)">
-            <textarea name="details" rows="4" placeholder="Your feedback" required></textarea>
-            <button type="submit">Submit Feedback</button>
-            <p id="feedbackStatus" role="status" aria-live="polite"></p>
-        </form>
-    </section>
-
 
     <!-- =========================================
      3D HERITAGE STUDIO
